@@ -6,10 +6,7 @@
 ---
 name: GitHub Pages
 
-on:
-  push:
-    branches:
-      - pre-draft
+on: [push, pull_request, workflow_dispatch]
 
 permissions:
   contents: write
@@ -26,19 +23,29 @@ jobs:
         with:
           python-version: 3.x
 
-      - name: Prime Cache Key
-        run: echo "cache_id=$(date --utc '+%V')" >> $GITHUB_ENV
+      - name: Install poetry
+        uses: abatilo/actions-poetry@v2
+
+      # create local virtualenv to enable caching in CI
+      - name: Configure poetry
+        run: |
+          poetry config virtualenvs.create true --local
+          poetry config virtualenvs.in-project true --local
 
       - name: Setup Cache
         uses: actions/cache@v4
         with:
-          key: mkdocs-material-${{ env.cache_id }}
-          path: .cache
-          restore-keys: |
-            mkdocs-material-
+          path: ./.venv
+          # cache is invalidated if dependencies change
+          key: venv-${{ hashFiles('poetry.lock') }}
 
-      - name: Install mkdocs-material
-        run: pip install mkdocs mkdocs-material mkdocs-markdownextradata-plugin
+      - name: Install the project dependencies
+        run: poetry install
+
+      - name: Build Pages
+        run: poetry run -- mkdocs build
 
       - name: GitHub Pages Deploy
-        run: mkdocs gh-deploy --force --clean --verbose
+        # only deploy if we are on the default branch
+        if: ${{ github.ref == 'refs/heads/pre-draft' }}
+        run: poetry run -- mkdocs gh-deploy --force --clean --verbose

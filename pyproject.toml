@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: 2024 Margo
+#
+# SPDX-License-Identifier: MIT
+#
+# SPDX-FileContributor: Michael Adler <michael.adler@siemens.com>
+[tool.poetry]
+name = "specification"
+version = "0.1.0"
+description = "Margo Specification"
+authors = []
+license = "Open Web Foundation - CLA Copyright Grant 0.9"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+mkdocs = "^1.6.1"
+mkdocs-markdownextradata-plugin = "^0.2.6"
+mkdocs-material = "^9.5.44"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
