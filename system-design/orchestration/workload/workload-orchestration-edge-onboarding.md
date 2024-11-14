@@ -1,4 +1,4 @@
-# Device Management Client Onboarding
+# Onboarding
 In order for the workload orchestration solution to manage the edge device's workloads, the device's management client must first complete onboarding.
 
 > Action: The details in this page are still under discussion and have not been finalized.

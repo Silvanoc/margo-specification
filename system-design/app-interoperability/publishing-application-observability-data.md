@@ -1,3 +1,5 @@
+# Publishing Application Observability Data
+
 Compliant applications MAY choose to expose application specific observability data by sending their observability data to the Open Telemetry collector on the standalone device or cluster. While this is optional, it is highly recommended in order to support distributed diagnostics.
 
 Application developers choosing to expose application metrics, traces or logs for consumption with OpenTelemetry MUST send the data to the OpenTelemetry collector using OTLP.

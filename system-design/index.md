@@ -1,3 +1,5 @@
+# Introduction
+
 ![(Margo )](./figures/margo-logo.svg)
 
 The Margo initiative is an open collaboration between like-minded organizations and individuals, sharing a common vision: deliver edge interoperability for industrial automation ecosystems. Margo is hosted by the Linux Foundation.

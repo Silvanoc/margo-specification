@@ -1,4 +1,4 @@
-# Device Capability
+# Device Capabilities
 
 The purpose of device capabilities reporting is to ensure the workload orchestration solution has the information needed to pair workloads with compatible edge devices. The [device's capabilities](../../margo-api-reference/workload-api/device-api/device-capabilities.md) are reported to the workload orchestration web service using [Margo management API](../../margo-api-reference/margo-api-specification.md).
 

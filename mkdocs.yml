@@ -2,40 +2,40 @@ site_name: System Design
 docs_dir: system-design
 
 nav:
-  - Introduction: index.md
-  - Example System Design: margo-overview/introduction-system-design.md
-  - Personas: margo-overview/personas.md
+  - index.md
+  - margo-overview/introduction-system-design.md
+  - margo-overview/personas.md
   - Concepts and Terms:
-       - Technical Lexicon: margo-overview/technical-lexicon.md
-       - Application Observability Overview: margo-overview/application-observability-overview.md
+       - margo-overview/technical-lexicon.md
+       - margo-overview/application-observability-overview.md
   - Application Distribution:
-      - Application Package Definition: app-interoperability/application-package-definition.md
-      - Workload Orchestration to App Registry Interactions: app-interoperability/workload-orch-to-app-reg-interaction.md
-      - Publishing Application Observability Data: app-interoperability/publishing-application-observability-data.md
+      - app-interoperability/application-package-definition.md
+      - app-interoperability/workload-orch-to-app-reg-interaction.md
+      - app-interoperability/publishing-application-observability-data.md
   - Device Interoperability:
-      - Device Requirements: device-interoperability/device-requirements.md
-      - Collecting Application Observability Data: device-interoperability/collecting-application-observability-data.md
+      - device-interoperability/device-requirements.md
+      - device-interoperability/collecting-application-observability-data.md
   - Orchestration:
       - Workload:
-          - Management API: orchestration/workload/workload-management-interface-breakdown.md
-          - Onboarding: orchestration/workload/workload-orchestration-edge-onboarding.md
-          - Device Capabilities: orchestration/workload/device-capability-reporting.md
-          - Workload Deployment: orchestration/workload/workload-deployment.md
-          - Consuming Application Observability Data: orchestration/workload/consuming-application-observability-data.md
+          - orchestration/workload/workload-management-interface-breakdown.md
+          - orchestration/workload/workload-orchestration-edge-onboarding.md
+          - orchestration/workload/device-capability-reporting.md
+          - orchestration/workload/workload-deployment.md
+          - orchestration/workload/consuming-application-observability-data.md
   ##    - Device:
   ##  - Appendix:
   ##    - Management API Definition: margo-overview/personas.md
   - Management API Reference:
-      - Overview: margo-api-reference/margo-api-specification.md
+      - margo-api-reference/margo-api-specification.md
       - Workload API:
           - Desired State API:
-              - Desired State: margo-api-reference/workload-api/desired-state-api/desired-state.md
+              - margo-api-reference/workload-api/desired-state-api/desired-state.md
           - Device API:
-              - Device Capabilities: margo-api-reference/workload-api/device-api/device-capabilities.md
-              - Deployment Status: margo-api-reference/workload-api/device-api/deployment-status.md
+              - margo-api-reference/workload-api/device-api/device-capabilities.md
+              - margo-api-reference/workload-api/device-api/deployment-status.md
           - Onboarding API:
-              - Device Onboarding: margo-api-reference/workload-api/onboarding-api/device-onboarding.md
-              - Certificate Download: margo-api-reference/workload-api/onboarding-api/rootca-download.md
+              - margo-api-reference/workload-api/onboarding-api/device-onboarding.md
+              - margo-api-reference/workload-api/onboarding-api/rootca-download.md
 
 theme:
   name: material

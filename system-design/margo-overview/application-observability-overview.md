@@ -1,3 +1,5 @@
+# Application Observability Overview
+
 Observability involves the collection and analysis of information produced by a system to monitor its internal behavior.
 
 Observability data is captured using the following signals:
