@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "margo-specification"
+version = "0.1.0"
+description = "Specifications of the Margo project."
+authors = ["Silvano Cirujano Cuesta <silvano.cirujano-cuesta@siemens.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "~3.12"
+linkml = "^1.8.5"
+mkdocs = "^1.6.1"
+mkdocs-material = "^9.5.46"
+mkdocs-markdownextradata-plugin = "^0.2.6"
+
+
+[tool.poetry.group.dev.dependencies]
+tox = "^4.23.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
