@@ -12,11 +12,14 @@ license = "Open Web Foundation - CLA Copyright Grant 0.9"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "~3.12"
 mkdocs = "^1.6.1"
 mkdocs-markdownextradata-plugin = "^0.2.6"
 mkdocs-material = "^9.5.44"
+linkml = "^1.8.5"
 
+[tool.poetry.group.dev.dependencies]
+tox = "^4.23.2"
 
 [build-system]
 requires = ["poetry-core"]
