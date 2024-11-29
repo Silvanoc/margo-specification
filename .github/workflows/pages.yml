@@ -11,6 +11,7 @@ on:
   push:
     branches:
       - pre-draft
+      - specification_use-linkml
 
 permissions:
   contents: write
