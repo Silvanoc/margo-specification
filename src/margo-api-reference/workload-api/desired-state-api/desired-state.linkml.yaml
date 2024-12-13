@@ -5,6 +5,7 @@ description: >-
   The desired state is expressed as a
   [Kubernetes custom resource definition](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/)
   and made available to the device's management client as a YAML document using the OpenGitOps pattern.
+version: 1.0 #Arne: update later
 prefixes:
   linkml: https://w3id.org/linkml/
   margo: http://specification.margo.org/
