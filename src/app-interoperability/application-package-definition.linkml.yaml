@@ -45,7 +45,9 @@ classes:
           Deployment profiles element specifying the types of deployments the application supports. 
           See the [Deployment](#deployment-profiles-attributes) section below.
         range: DeploymentProfile #Arne: mistake in spec: called "Deployment" but type is called "DeploymentProfile"
-        multivalued: false
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
         required: true
         rank: 40
       parameters:
