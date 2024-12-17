@@ -4,7 +4,7 @@ metadata:
   id: com-northstartida-hello-world
   name: Hello World
   description: A basic hello world application
-  version: 1.0
+  version: "1.0"
   catalog:
     application:
       icon: ./resources/hw-logo.png
