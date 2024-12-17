@@ -292,7 +292,11 @@ classes:
           The parameter's default value. 
           Accepted data types are string, integer, double, boolean, array[string], array[integer], array[double], array[boolean].
         rank: 20
-        range: string #Arne: error in spec. type not properly given.
+        any_of: #support for arrays still TBD
+          - range: boolean
+          - range: integer
+          - range: double
+          - range: string
       targets:
         description: >-
           Used to indicate which component the value should be applied to when installing, or updating, the application. 
