@@ -31,7 +31,7 @@ classes:
         description: Specifies the object type; must be 'application'.
         range: string
         required: true
-        pattern: ^application$ #Arne: should this be changed to "ApplicationDescription"?
+        equals_string: "application" #Arne: should this be changed to "ApplicationDescription"?
         rank: 20
       metadata:
         description: >-
@@ -88,7 +88,8 @@ classes:
         range: string
         required: true
       description:
-            range: string
+        range: string
+        rank: 25
       version:
         description: The application's version.
         rank: 30
