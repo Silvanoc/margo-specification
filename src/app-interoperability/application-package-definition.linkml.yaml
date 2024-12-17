@@ -56,6 +56,8 @@ classes:
           See the [Parameter](#parameter-attributes)
         range: Parameter #Arne: mmmh, spec defines this as map[string][Parameter]
         multivalued: true
+        inlined: true
+        inlined_as_list: false
         rank: 50
       configuration:
         description: >-
