@@ -412,7 +412,7 @@ classes:
         rank: 10
         range: string
         required: true
-      datatype:
+      dataType:
         description: >-
           Indicates the expected data type for the user provided value. 
           Accepted values are string, integer, double, boolean, array[string], array[integer], array[double], array[boolean]. 
