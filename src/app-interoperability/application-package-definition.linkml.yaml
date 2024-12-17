@@ -436,6 +436,18 @@ classes:
         description: If set, indicates the maximum number of characters the value must have to be considered valid.
         rank: 50
         range: integer
+      minValue:
+        description: If set, indicates the minimum value to be considered valid.
+        rank: 50
+        range: float
+      maxValue:
+        description: If set, indicates the maximum value to be considered valid.
+        rank: 50
+        range: float
+      maxPrecision:
+        description: If set, indicates the maximum precision to be considered valid.
+        rank: 50
+        range: integer
       regexMatch:
         description: If set, indicates a regular expression to use to validate the value.
         rank: 55
