@@ -1,5 +1,6 @@
 {
     "root": "src/margo-api-reference/workload-api/desired-state-api",
     "targetclass": "DesiredState",
-    "schemafile": "desired-state.linkml.yaml"
+    "schemafile": "desired-state.linkml.yaml",
+    "markdowndoc": "desired-state.md"
 }
