@@ -85,6 +85,8 @@ classes:
         rank: 20
         range: string
         required: true
+      description:
+            range: string
       version:
         description: The application's version.
         rank: 30
