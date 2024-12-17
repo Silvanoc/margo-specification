@@ -238,9 +238,6 @@ classes:
            See the [Component Properties](#component-properties) section below.
         range: ComponentProperties #Arne: error in spec, as it is defined as map[string][interface{}] 
         required: true
-        multivalued: true
-        inlined: true
-        inlined_as_list: false
         rank: 20
 
   HelmComponent:
