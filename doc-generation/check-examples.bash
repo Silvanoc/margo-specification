@@ -9,7 +9,7 @@ RUN="poetry -C "${THIS_DIR}" run"
 DOCS_GEN="${THIS_DIR}"
 CONFIGS="${DOCS_GEN}/configurations"
 
-gen_spec () {
+check_spec () {
     SPEC_ROOT="${ROOT_DIR}/$(jq -r '.root' "${CONFIGS}/$1")"
     echo "Spec root folder: ${SPEC_ROOT}"
 
@@ -31,12 +31,15 @@ gen_spec () {
 
     COUNTEREXAMPLES_DIR="${SPEC_ROOT}/examples/invalid"
     for COUNTEREXAMPLE in $(ls "${COUNTEREXAMPLES_DIR}"/*-0*.yaml) ; do
-        ${RUN} linkml validate \
-            --schema "${SPEC_ROOT}/${SCHEMA_FILE}" \
-            --target-class "${TARGET_CLASS}" \
-            "${COUNTEREXAMPLE}" \
-                && echo "ERROR: Validation of 'examples/invalid/${COUNTEREXAMPLE}' was expected to fail, but has succeeded." \
-                || echo "ok: validation failed, as expected"
+        if ! ${RUN} linkml validate \
+                --schema "${SPEC_ROOT}/${SCHEMA_FILE}" \
+                --target-class "${TARGET_CLASS}" \
+                "${COUNTEREXAMPLE}" ; then
+            echo "ok: validation failed, as expected"
+        else
+            echo "ERROR: Validation of 'examples/invalid/${COUNTEREXAMPLE}' was expected to fail, but has succeeded."
+            exit 1
+        fi
     done
 
     # does not work due to following LinkML bugs:
@@ -52,6 +55,6 @@ gen_spec () {
 }
 
 for spec in $(ls "${CONFIGS}") ; do
-    gen_spec "${spec}"
+    check_spec "${spec}"
 done
 
