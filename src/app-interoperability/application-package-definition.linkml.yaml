@@ -349,6 +349,8 @@ classes:
         rank: 20
         range: Schema
         multivalued: true
+        inlined: true
+        inlined_as_list: true
         required: true
 
   Section:
