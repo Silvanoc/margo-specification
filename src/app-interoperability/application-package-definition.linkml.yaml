@@ -31,7 +31,7 @@ classes:
         description: Specifies the object type; must be 'application'.
         range: string
         required: true
-        pattern: ^application$ #Arne: should this be changed to "ApplicationDescription"?
+        equals_string: "application" #Arne: should this be changed to "ApplicationDescription"?
         rank: 20
       metadata:
         description: >-
@@ -88,7 +88,8 @@ classes:
         range: string
         required: true
       description:
-            range: string
+        range: string
+        rank: 25
       version:
         description: The application's version.
         rank: 30
@@ -120,6 +121,8 @@ classes:
         rank: 20
         range: Author
         multivalued: true
+        inlined: true
+        inlined_as_list: true
       organization:
         description: >-
           Organization element specifying metadata about the organization/company providing the application. 
@@ -128,6 +131,8 @@ classes:
         range: Organization
         multivalued: true
         required: true
+        inlined: true
+        inlined_as_list: true
 
   ApplicationMetadata:
     description: Metadata specific to the application.
@@ -162,6 +167,8 @@ classes:
         rank: 70
         range: string
         multivalued: true
+        inlined: true
+        inlined_as_list: true
 
   Author:
     description: Information about the application's author.
@@ -305,6 +312,8 @@ classes:
         range: Target
         required: true
         multivalued: true
+        inlined: true
+        inlined_as_list: true
 
   Target:
     description: Specifies where the parameter applies in the deployment.
@@ -339,6 +348,8 @@ classes:
         rank: 10
         range: Section
         multivalued: true
+        inlined: true
+        inlined_as_list: true
         required: true
       schema:
         description: >-
@@ -520,3 +531,4 @@ slots:
     inlined: true
     inlined_as_list: true
     rank: 20
+
