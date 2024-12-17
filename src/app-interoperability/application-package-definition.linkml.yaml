@@ -500,4 +500,6 @@ slots:
     range: Component
     multivalued: true
     required: true
+    inlined: true
+    inlined_as_list: true
     rank: 20
