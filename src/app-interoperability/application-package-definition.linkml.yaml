@@ -121,6 +121,8 @@ classes:
         rank: 20
         range: Author
         multivalued: true
+        inlined: true
+        inlined_as_list: true
       organization:
         description: >-
           Organization element specifying metadata about the organization/company providing the application. 
@@ -129,6 +131,8 @@ classes:
         range: Organization
         multivalued: true
         required: true
+        inlined: true
+        inlined_as_list: true
 
   ApplicationMetadata:
     description: Metadata specific to the application.
@@ -521,3 +525,4 @@ slots:
     inlined: true
     inlined_as_list: true
     rank: 20
+
