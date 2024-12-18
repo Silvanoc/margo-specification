@@ -82,7 +82,7 @@ An example of a `margo.yaml` file using multiple helm charts and a docker-compos
 | Attribute | Type | Required? | Description |
 | --- | --- | --- | --- |
 {% for slot in schemaview.class_slots("ApplicationDescription")|sort(attribute='rank') -%}
-| {{ slot }} | {{ schemaview.get_slot(slot).range }} | {% if schemaview.get_slot(slot).required == True %} Y {% else %} N {% endif %} | {{ schemaview.get_slot(slot).description }}|
+| {{ slot }} | {{ format_range(schemaview.get_slot(slot)) }} | {% if schemaview.get_slot(slot).required == True %} Y {% else %} N {% endif %} | {{ schemaview.get_slot(slot).description }}|
 {% endfor -%}
 
 {% for c in gen.all_class_objects()|sort(attribute='rank') %}
