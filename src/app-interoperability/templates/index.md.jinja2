@@ -64,15 +64,19 @@ An example of a `margo.yaml` file using multiple helm charts and a docker-compos
 {% endmacro %}
 
 {%- macro format_range(slot) -%}
-    {%- if slot.multivalued and slot.inlined -%}
-        {%- if slot.inlined_as_list -%}
-            []{{ slot.range }}
-        {%- else -%}
-            {%- if slot.name == "properties" -%}
-                map[string][string]
+    {%- if slot.multivalued -%}
+        {%- if slot.inlined -%}
+            {%- if slot.inlined_as_list -%}
+                []{{ slot.range }}
             {%- else -%}
-                map[string][{{ slot.range }}]
+                {%- if slot.name == "properties" -%}
+                    map[string][string]
+                {%- else -%}
+                    map[string][{{ slot.range }}]
+                {%- endif -%}
             {%- endif -%}
+        {%- else -%}
+            []string
         {%- endif -%}
     {%- else -%}
         {{ slot.range }}
