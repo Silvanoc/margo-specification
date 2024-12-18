@@ -148,5 +148,5 @@ jobs:
 
       - name: GitHub Pages Deploy
         # only deploy if we are on the default branch
-        if: ${{ github.ref == 'refs/heads/pre-draft' }}
+        if: ${{ github.ref == 'refs/heads/pre-draft' || github.ref == 'refs/heads/specification_use-linkml' }}
         run: poetry run -- mkdocs gh-deploy --force --clean --verbose
