@@ -167,6 +167,8 @@ classes:
         rank: 70
         range: string
         multivalued: true
+        inlined: true
+        inlined_as_list: true
 
   Author:
     description: Information about the application's author.
@@ -310,6 +312,8 @@ classes:
         range: Target
         required: true
         multivalued: true
+        inlined: true
+        inlined_as_list: true
 
   Target:
     description: Specifies where the parameter applies in the deployment.
@@ -344,6 +348,8 @@ classes:
         rank: 10
         range: Section
         multivalued: true
+        inlined: true
+        inlined_as_list: true
         required: true
       schema:
         description: >-
