@@ -19,7 +19,7 @@ gen_spec () {
 
     ${RUN} linkml generate doc \
         --directory="${SRC_ROOT}/docs" \
-        --template-directory="${SRC_ROOT}/templates" \
+        --template-directory="${SRC_ROOT}/resources" \
         "${SRC_ROOT}/${SCHEMA_FILE}"
 
     mv "${SRC_ROOT}/docs/index.md" "${SPEC_ROOT}/${MKDOWN_FILE}"
