@@ -19,7 +19,7 @@ check_spec () {
     SCHEMA_FILE="$(jq -r '.schemafile' "${CONFIGS}/$1")"
     echo "Schema file: ${SCHEMA_FILE}"
 
-    EXAMPLES_DIR="${SPEC_ROOT}/examples/valid"
+    EXAMPLES_DIR="${SPEC_ROOT}/resources/examples/valid"
     echo "Examples folder: ${EXAMPLES_DIR}"
     for EXAMPLE in $(ls "${EXAMPLES_DIR}"/*-0*.yaml) ; do
         echo "Validate example: ${EXAMPLE}"
@@ -29,7 +29,7 @@ check_spec () {
             "${EXAMPLE}"
     done
 
-    COUNTEREXAMPLES_DIR="${SPEC_ROOT}/examples/invalid"
+    COUNTEREXAMPLES_DIR="${SPEC_ROOT}/resources/examples/invalid"
     for COUNTEREXAMPLE in $(ls "${COUNTEREXAMPLES_DIR}"/*-0*.yaml) ; do
         if ! ${RUN} linkml validate \
                 --schema "${SPEC_ROOT}/${SCHEMA_FILE}" \
@@ -48,8 +48,8 @@ check_spec () {
     if false ; then
     ${RUN} linkml examples \
         --schema "${SPEC_ROOT}/*.linkml.yaml" \
-        --input-directory "${SPEC_ROOT}/examples/valid" \
-        --counter-example-input-directory "${SPEC_ROOT}/examples/invalid" \
+        --input-directory "${SPEC_ROOT}/resources/examples/valid" \
+        --counter-example-input-directory "${SPEC_ROOT}/resources/examples/invalid" \
         --output-directory "${SPEC_ROOT}/output"
     fi
 }
