@@ -53,7 +53,7 @@ classes:
       parameters:
         description: >-
           Parameters element specifying the configurable parameters to use when installing, or updating, the application.
-          See the [Parameter](#parameter-attributes)
+          See the [Parameter](#parameter-attributes) section below.
         range: Parameter #Arne: mmmh, spec defines this as map[string][Parameter]
         multivalued: true
         inlined: true
@@ -207,7 +207,7 @@ classes:
 
   HelmDeploymentProfile:
     is_a: DeploymentProfile
-    rank: 40
+    #rank: 63
     slot_usage:
       type:
         equals_string: "helm.v3"
@@ -218,7 +218,7 @@ classes:
 
   DockerComposeDeploymentProfile:
     is_a: DeploymentProfile
-    rank: 40
+    #rank: 66
     slot_usage:
       type:
         equals_string: "docker-compose"
@@ -229,7 +229,7 @@ classes:
 
   Component:
     description: A class representing a component of a deployment profile.
-    rank: 50
+    rank: 70
     attributes:
       name:
         description: >-
@@ -249,11 +249,11 @@ classes:
 
   HelmComponent:
     is_a: Component
-    rank: 50
+    #rank: 73
 
   DockerComposeComponent:
     is_a: Component
-    rank: 50
+    #rank: 76
   
   ComponentProperties:
     description: Properties dictionary for component deployment details.

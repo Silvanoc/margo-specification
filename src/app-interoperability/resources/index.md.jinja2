@@ -83,15 +83,16 @@ An example of a `margo.yaml` file using multiple helm charts and a docker-compos
     {%- endif -%}
 {%- endmacro -%}
 
+
+{% for slot in schemaview.class_slots("ApplicationDescription")|sort(attribute='rank') -%}
 | Attribute | Type | Required? | Description |
 | --- | --- | --- | --- |
-{% for slot in schemaview.class_slots("ApplicationDescription")|sort(attribute='rank') -%}
 | {{ slot }} | {{ format_range(schemaview.get_slot(slot)) }} | {% if schemaview.get_slot(slot).required == True %} Y {% else %} N {% endif %} | {{ schemaview.get_slot(slot).description }}|
 {% endfor -%}
 
 {% for c in gen.all_class_objects()|sort(attribute='rank') %}
-{%- if c.name != "ApplicationDescription" and not c.name.startswith("Helm") and not c.name.startswith("DockerCompose") and not c.name == "Property" %}
-#### {{ c.name }} Attributes
+{%- if c.name != "ApplicationDescription" and not c.name.startswith("ComponentProperties") and not c.name.startswith("Helm") and not c.name.startswith("DockerCompose") %}
+### {{ c.name }} Attributes
 
 | Attribute | Type | Required? | Description |
 | --- | --- | --- | --- |
@@ -102,5 +103,13 @@ An example of a `margo.yaml` file using multiple helm charts and a docker-compos
 | {{ slot.name }} | <*see description*> | {% if slot.required == True %} Y {% else %} N {% endif %} | {{ slot.description }}|
 {%- endif %}
 {% endfor %}
+{%- endif %}
+{%- if c.name.startswith("ComponentProperties") %}
+### ComponentProperties Attributes
+The expected properties for the suppported deployment types are indicated below.
+
+- Properties for `helm.v3` components
+
+- Properties for `docker-compose` components
 {%- endif %}
 {%- endfor %}
