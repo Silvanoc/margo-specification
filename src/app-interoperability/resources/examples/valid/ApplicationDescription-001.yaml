@@ -1,5 +1,5 @@
 apiVersion: margo.org/v1-alpha1
-kind: application
+kind: application  # Arne: change to ApplicationDescription ?
 metadata:
   id: com-northstartida-hello-world
   name: Hello World
