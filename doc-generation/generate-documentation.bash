@@ -5,7 +5,7 @@ set -eu
 THIS_SCRIPT="$(readlink -f "${0}")"
 THIS_DIR="$(dirname "${THIS_SCRIPT}")"
 ROOT_DIR="$(dirname "${THIS_DIR}")"
-RUN="poetry -C "${THIS_DIR}" run"
+RUN="poetry -C "${ROOT_DIR}" run"
 DOCS_GEN="${THIS_DIR}"
 CONFIGS="${DOCS_GEN}/configurations"
 
