@@ -31,7 +31,7 @@ classes:
         description: Specifies the object type; must be 'application'.
         range: string
         required: true
-        equals_string: "application" #Arne: should this be changed to "ApplicationDescription"?
+        equals_string: "application" #Arne: should this be changed to "ApplicationPackageDefinition"?
         rank: 20
       metadata:
         description: >-
@@ -43,7 +43,7 @@ classes:
       deploymentProfiles:
         description: >-
           Deployment profiles element specifying the types of deployments the application supports. 
-          See the [Deployment](#deployment-profiles-attributes) section below.
+          See the [Deployment](#deploymentprofile-attributes) section below.
         range: DeploymentProfile #Arne: mistake in spec: called "Deployment" but type is called "DeploymentProfile"
         multivalued: true
         inlined: true
@@ -53,7 +53,7 @@ classes:
       parameters:
         description: >-
           Parameters element specifying the configurable parameters to use when installing, or updating, the application.
-          See the [Parameter](#parameter-attributes)
+          See the [Parameter](#parameter-attributes) section below.
         range: Parameter #Arne: mmmh, spec defines this as map[string][Parameter]
         multivalued: true
         inlined: true
@@ -99,7 +99,7 @@ classes:
         description: >-
           Catalog element specifying the application catalog details used to display the application 
           in an application catalog or marketplace. 
-          See the [Catalog](#catalog-attribute) section below.
+          See the [Catalog](#catalog-attributes) section below.
         rank: 40
         range: Catalog
         required: true
@@ -111,13 +111,13 @@ classes:
       application:
         description: >-
           Application element specifying the application specific metadata. 
-          See the [Application Metadata](#application-metadata-attributes) section below.
+          See the [Application Metadata](#applicationmetadata-attributes) section below.
         rank: 10
         range: ApplicationMetadata #Arne: mistake in spec where it is called "Application"
       author:
         description: >-
           Author element specifying metadata about the application's author. 
-          See the [Author Metadata](#author-metadata-attributes) section below.
+          See the [Author Metadata](#author-attributes) section below.
         rank: 20
         range: Author
         multivalued: true
@@ -126,7 +126,7 @@ classes:
       organization:
         description: >-
           Organization element specifying metadata about the organization/company providing the application. 
-          See the [Organization Metadata](#organization-metadata-attributes) section below.
+          See the [Organization Metadata](#organization-attributes) section below.
         rank: 30
         range: Organization
         multivalued: true
@@ -207,7 +207,7 @@ classes:
 
   HelmDeploymentProfile:
     is_a: DeploymentProfile
-    rank: 40
+    #rank: 63
     slot_usage:
       type:
         equals_string: "helm.v3"
@@ -218,7 +218,7 @@ classes:
 
   DockerComposeDeploymentProfile:
     is_a: DeploymentProfile
-    rank: 40
+    #rank: 66
     slot_usage:
       type:
         equals_string: "docker-compose"
@@ -229,7 +229,7 @@ classes:
 
   Component:
     description: A class representing a component of a deployment profile.
-    rank: 50
+    rank: 70
     attributes:
       name:
         description: >-
@@ -242,18 +242,18 @@ classes:
       properties:
         description: >-
            A dictionary element specifying the component packages's deployment details. 
-           See the [Component Properties](#component-properties) section below.
+           See the [Component Properties](#componentproperties-attributes) section below.
         range: ComponentProperties #Arne: error in spec, as it is defined as map[string][interface{}] 
         required: true
         rank: 20
 
   HelmComponent:
     is_a: Component
-    rank: 50
+    #rank: 73
 
   DockerComposeComponent:
     is_a: Component
-    rank: 50
+    #rank: 76
   
   ComponentProperties:
     description: Properties dictionary for component deployment details.
@@ -329,8 +329,8 @@ classes:
         required: true
       components:
         description: >-
-          Indicates which deployment profile [component](#component-attribute) the parameter target applies to. 
-          The component name specified here MUST match a component name in the [deployment profiles](#deployment-profiles-attributes) section.
+          Indicates which deployment profile [component](#component-attributes the parameter target applies to. 
+          The component name specified here MUST match a component name in the [deployment profiles](#deploymentprofile-attributes) section.
         rank: 20
         range: string
         multivalued: true
@@ -419,7 +419,7 @@ classes:
     rank: 140
     attributes:
       name:
-        description: The name of the schema rule. This used in the [setting](#setting-attribute) to link the setting to the schema rule.
+        description: The name of the schema rule. This used in the [setting](#setting-attributes) to link the setting to the schema rule.
         rank: 10
         range: string
         required: true
@@ -431,79 +431,134 @@ classes:
         rank: 20
         range: string
         required: true
-        pattern: ^(string|integer|double|boolean|array\[.*\])$
-      #Arne: error in specification: 'validation rule' not accurate. 
-      
-      # Text Validation Rules
+      validationRule:
+        description: >-
+          Defines the validation rules to use to validate the user provided parameter value. 
+          The rules are based on the schema's data type and are listed below. 
+          The value MUST be validated against any validation rules defined in the schema.
+        rank: 30
+        range: ValidationRule
+        required: false
+
+  ValidationRule:
+    description: Each data type has its own set of validation rules that can be used.
+    rank: 140
+
+  TextValidationRule:
+    is_a: ValidationRule
+    #description: ...
+    rank: 150
+    attributes:
       allowEmpty:
-        description: If true, indicates a value must be provided. Default is false if not provided.
+        description: >-
+          If true, indicates a value must be provided. Default is false if not provided.
         rank: 30
         range: boolean
+        required: false
       minLength:
         description: If set, indicates the minimum number of characters the value must have to be considered valid.
         rank: 40
         range: integer
+        required: false
       maxLength:
         description: If set, indicates the maximum number of characters the value must have to be considered valid.
         rank: 50
         range: integer
-      minValue:
-        description: If set, indicates the minimum value to be considered valid.
-        rank: 50
-        range: float
-      maxValue:
-        description: If set, indicates the maximum value to be considered valid.
-        rank: 50
-        range: float
-      maxPrecision:
-        description: If set, indicates the maximum precision to be considered valid.
-        rank: 50
-        range: integer
+        required: false
       regexMatch:
         description: If set, indicates a regular expression to use to validate the value.
         rank: 55
         range: string
+        required: false
 
-      # Boolean Validation Rules
-      # allowEmpty: #Arne: error in specification: listing of this twice
-      #   description: If true, indicates a value must be provided. Default is false if not provided.
-      #   rank: 57
-      #   range: boolean
+  BooleanValidationRule:
+    is_a: ValidationRule
+    #description: ...
+    rank: 160
+    attributes:
+      allowEmpty:
+        description: >-
+          If true, indicates a value must be provided. Default is false if not provided.
+        rank: 30
+        range: boolean
+        required: false
 
-      # # Numeric Integer Validation Rules
-      # maxLength:
-      #   description: If set, indicates the minimum allowed integer value the value must have to be considered valid. 
-      #   rank: 50
-      #   range: integer
-      # regexMatch:
-      #   description: If set, indicates the maximum allowed integer value the value must have to be considered valid. 
-      #   rank: 55
-      #   range: integer
+  NumericIntegerValidationRule:
+    is_a: ValidationRule
+    #description: ...
+    rank: 170
+    attributes:
+      allowEmpty:
+        description: >-
+          If true, indicates a value must be provided. Default is false if not provided.
+        rank: 30
+        range: boolean
+        required: false
+      minValue:
+        description: If set, indicates the minimum allowed integer value the value must have to be considered valid.
+        rank: 50
+        range: integer
+        required: false
+      maxValue:
+        description: If set, indicates the maximum allowed integer value the value must have to be considered valid.
+        rank: 50
+        range: integer
+        required: false
 
-      # # Numeric Double Validation Rules
-      # minValue:
-      #   description: Minimum numeric value for integer or double types.
-      #   rank: 60
-      #   range: double
-      # maxValue:
-      #   description: Maximum numeric value for integer or double types.
-      #   rank: 70
-      #   range: double
-      # minValue:
-      #   description: Minimum numeric value for integer or double types.
-      #   rank: 60
-      #   range: double
-      # maxValue:
-      #   description: Maximum numeric value for integer or double types.
-      #   rank: 70
-      #   range: double
-      
-      # # Select Validation Rules
-      # options:
-      #   description: List of acceptable values for selection inputs.
-      #   rank: 80
-      #   range: string
-      #   multivalued: true
+  NumericDoubleValidation Rule:
+    is_a: ValidationRule
+    #description: ...
+    rank: 180
+    attributes:
+      allowEmpty:
+        description: >-
+          If true, indicates a value must be provided. Default is false if not provided.
+        rank: 30
+        range: boolean
+        required: false
+      minValue:
+        description: If set, indicates the minimum value to be considered valid.
+        rank: 50
+        range: float
+        required: false
+      maxValue:
+        description: If set, indicates the maximum value to be considered valid.
+        rank: 50
+        range: float
+        required: false
+      minPrecision:
+        description: If set, indicates the minimum level of precision the value must have to be considered valid.
+        rank: 50
+        range: integer
+        required: false
+      maxPrecision:
+        description: If set, indicates the maximum level of precision the value must have to be considered valid.
+        rank: 50
+        range: integer
+        required: false
+
+  SelectValidationRule:
+    is_a: ValidationRule
+    #description: ...
+    rank: 190
+    attributes:
+      allowEmpty:
+        description: >-
+          If true, indicates a value must be provided. Default is false if not provided.
+        rank: 30
+        range: boolean
+        required: false
+      multiselect:
+        description: If true, indicates multiple values can be selected. If multiple values can be selected the resulting value is an array of the selected values. The default is false if not provided.
+        rank: 80
+        range: boolean
+        required: false
+      options:
+        description: This provides the list of acceptable options the user can select from. The data type for each option must match the parameter setting’s data type.
+        rank: 80
+        range: string
+        multivalued: true
+        required: true
 
 slots:
   type:
