@@ -5,9 +5,22 @@ set -eu
 THIS_SCRIPT="$(readlink -f "${0}")"
 THIS_DIR="$(dirname "${THIS_SCRIPT}")"
 ROOT_DIR="$(dirname "${THIS_DIR}")"
-RUN="poetry -C "${THIS_DIR}" run"
 DOCS_GEN="${THIS_DIR}"
 CONFIGS="${DOCS_GEN}/configurations"
+
+if command -v poetry 2>&1 >/dev/null ; then
+    RUN="poetry run"
+else
+    if ! command -v linkml 2>&1 >/dev/null ; then
+        echo "The command 'linkml' is missing"
+        exit 1
+    fi
+    if ! command -v mkdocs 2>&1 >/dev/null ; then
+        echo "The command 'mkdocs' is missing"
+        exit 1
+    fi
+    RUN=""
+fi
 
 check_spec () {
     SPEC_ROOT="${ROOT_DIR}/$(jq -r '.root' "${CONFIGS}/$1")"
