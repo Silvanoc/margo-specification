@@ -415,7 +415,7 @@ classes:
         required: true
 
   Schema:
-    description: Validation rules for parameter values.
+    description: Defines data type and rules for validating user provided parameter values. Subclasses (see below) define for each data type their own set of validation rules that can be used. The value MUST be validated against all rules defined in the schema.
     rank: 140
     attributes:
       name:
@@ -431,22 +431,18 @@ classes:
         rank: 20
         range: string
         required: true
-      validationRule:
-        description: >-
-          Defines the validation rules to use to validate the user provided parameter value. 
-          The rules are based on the schema's data type and are listed below. 
-          The value MUST be validated against any validation rules defined in the schema.
-        rank: 30
-        range: ValidationRule
-        required: false
+      #validationRule:
+      #  description: >-
+      #    Defines the validation rules to use to validate the user provided parameter value. 
+      #    The rules are based on the schema's data type and are listed below. 
+      #    The value MUST be validated against any validation rules defined in the schema.
+      #  rank: 30
+      #  range: ValidationRule
+      #  required: false
 
-  ValidationRule:
-    description: Each data type has its own set of validation rules that can be used.
-    rank: 140
-
-  TextValidationRule:
-    is_a: ValidationRule
-    #description: ...
+  TextValidationSchema:
+    is_a: Schema
+    description: Extends schema to define a string/text-specific set of validation rules that can be used.
     rank: 150
     attributes:
       allowEmpty:
@@ -471,9 +467,9 @@ classes:
         range: string
         required: false
 
-  BooleanValidationRule:
-    is_a: ValidationRule
-    #description: ...
+  BooleanValidationSchema:
+    is_a: Schema
+    description: Extends schema to define a boolean-specific set of validation rules that can be used.
     rank: 160
     attributes:
       allowEmpty:
@@ -483,9 +479,9 @@ classes:
         range: boolean
         required: false
 
-  NumericIntegerValidationRule:
-    is_a: ValidationRule
-    #description: ...
+  NumericIntegerValidationSchema:
+    is_a: Schema
+    description: Extends schema to define a integer-specific set of validation rules that can be used.
     rank: 170
     attributes:
       allowEmpty:
@@ -505,9 +501,9 @@ classes:
         range: integer
         required: false
 
-  NumericDoubleValidation Rule:
-    is_a: ValidationRule
-    #description: ...
+  NumericDoubleValidationSchema:
+    is_a: Schema
+    description: Extends schema to define a double-specific set of validation rules that can be used.
     rank: 180
     attributes:
       allowEmpty:
@@ -537,9 +533,9 @@ classes:
         range: integer
         required: false
 
-  SelectValidationRule:
-    is_a: ValidationRule
-    #description: ...
+  SelectValidationSchema:
+    is_a: Schema
+    description: Extends schema to define a specific set of validation rules that can be used for select options.
     rank: 190
     attributes:
       allowEmpty:
