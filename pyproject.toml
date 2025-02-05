@@ -3,25 +3,28 @@
 # SPDX-License-Identifier: MIT
 #
 # SPDX-FileContributor: Michael Adler <michael.adler@siemens.com>
-[tool.poetry]
+[project]
 name = "specification"
 version = "0.1.0"
 description = "Margo Specification"
 authors = []
 license = "Open Web Foundation - CLA Copyright Grant 0.9"
 readme = "README.md"
-package-mode = false
+requires-python = ">=3.12,<4.0"
+dependencies = [
+  'mkdocs>=1.6.1',
+  'mkdocs-markdownextradata-plugin>=0.2.6',
+  'mkdocs-material>=9.5.44',
+  'linkml>=1.8.5',
+]
 
-[tool.poetry.dependencies]
-python = "~3.12"
-mkdocs = "^1.6.1"
-mkdocs-markdownextradata-plugin = "^0.2.6"
-mkdocs-material = "^9.5.44"
-linkml = "^1.8.5"
+[tool.poetry]
+requires-poetry = ">=2.0"
+package-mode = false
 
 [tool.poetry.group.dev.dependencies]
 tox = "^4.23.2"
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=2.0"]
 build-backend = "poetry.core.masonry.api"
