@@ -139,6 +139,9 @@ jobs:
       - name: Install the project dependencies
         run: poetry install
 
+      - name: List non-generated MarkDown documents
+        run: find system-design -type f | sort
+
       - name: Get generated documentation from previous jobs
         uses: actions/download-artifact@v4
         with:
@@ -147,8 +150,14 @@ jobs:
             system-design/app-interoperability/application-package-definition.md
             system-design/margo-api-reference/workload-api/desired-state-api/desired-state.md
 
+      - name: List MarkDown documents
+        run: find system-design -type f | sort
+
       - name: Build Pages
         run: poetry run -- mkdocs build
+
+      - name: List HTML documents
+        run: find site -type f | sort
 
       - name: GitHub Pages Deploy
         # only deploy if we are on the default branch
