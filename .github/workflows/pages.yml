@@ -101,8 +101,10 @@ jobs:
       - name: Share generated documentation with later jobs
         uses: actions/upload-artifact@v4
         with:
-          name: desired-state.md
-          path: system-design/margo-api-reference/workload-api/desired-state-api/desired-state.md
+          name: linkml-generated-documents
+          path: |
+            system-design/app-interoperability/application-package-definition.md
+            system-design/margo-api-reference/workload-api/desired-state-api/desired-state.md
 
   pages:
     needs:
@@ -137,14 +139,16 @@ jobs:
       - name: Install the project dependencies
         run: poetry install
 
-      - name: Build Pages
-        run: poetry run -- mkdocs build
-
       - name: Get generated documentation from previous jobs
         uses: actions/download-artifact@v4
         with:
-          name: desired-state.md
-          path: system-design/margo-api-reference/workload-api/desired-state-api
+          name: linkml-generated-documents
+          path: |
+            system-design/app-interoperability/application-package-definition.md
+            system-design/margo-api-reference/workload-api/desired-state-api/desired-state.md
+
+      - name: Build Pages
+        run: poetry run -- mkdocs build
 
       - name: GitHub Pages Deploy
         # only deploy if we are on the default branch
