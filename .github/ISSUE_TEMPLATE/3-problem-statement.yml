@@ -1,0 +1,40 @@
+---
+name: Problem Statement
+description: Describe a problem statement associated with the Margo Specification that requires a resolution.
+labels: [Problem Statement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before requesting: search [existing issues](https://github.com/margo/specification/labels/Problem%20Statement).
+
+  - type: textarea
+    attributes:
+      label: "Supported Use-Cases / Technology Scenarios"
+      description: "Provide use cases / technology scenarios associated with the problem statement. Use cases should also provide details regarding impacted personas"
+      placeholder: "This problem statement has the following use cases and/or technology scenarios."
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: "Impacted Margo Components"
+      description: "Describe the impacted Margo Components you believe this problem statement is associated with"
+      placeholder: "App Package, Workload Fleet Manager, Device Fleet Manager, Observability, Devices"
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: "Associated Requirements"
+      description: "Please provide, if any, related requirements associated with this problem statement. List all that apply"
+      placeholder: "Requirement A, Requirement B, etc."
+    validations:
+      required: false
+
+  - type: textarea
+    attributes:
+      label: "Current Technologies being evaluated"
+      description: "If possible, describe what technologies are currently being evaluated to solve this problem statement"
+    validations:
+      required: false
