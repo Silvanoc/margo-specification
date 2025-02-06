@@ -77,3 +77,96 @@ Check with your employer when not working on your own!
 1. Create a pull request on Github.
 2. The EasyCLA check, CI pipeline, and other applicable checks as may be introduced must pass.
 3. Accepted pull requests are merged into the `pre-draft` branch.
+
+## Documentation Generation Process
+
+Some of the resources being used in the Margo APIs are being manually specified using MarkDown files.
+In this case `mkdocs` is used to generate the documentation in HTML format.
+
+But for some others the modeling language [LinkML](https://linkml.io/) is being used to generate the documentation.
+In this case `linkml` is used to generate the MarkDown documents that are integrated with the above mentioned documents before `mkdocs` can generate the HTML documents.
+
+### Preparation
+
+There are multiple different possibilities to cover as many user set-ups as possible:
+
+- [Development Containers](https://containers.dev/)
+- [Python Poetry](https://python-poetry.org/)
+- [Python PIP](https://pypi.org/project/pip/)
+- Others might or might not work out of the box
+
+#### Development Containers
+
+This repository provides a Development Container (AKA dev-container) that is automatically recognized by VsCode.
+
+It is out of the scope of this project to document how to use Development Containers, please visit <https://containers.dev/> to help yourself.
+
+The provided dev-container includes all dependencies.
+Therefore, once the Development Container has been activated, the preparation is done.
+
+#### Python Poetry
+
+Python Poetry is a widely used tool for dependency management in the Python ecosystem.
+
+It is out of the scope of this project to document how to use Python Poetry, please visit <https://python-poetry.org/> to help yourself.
+
+One feature of Poetry (also available in some of the other tools) very important for the reliability of the generation process is the possibility of easily "freezing" the dependencies and installing them in Python virtual environments (AKA _venv_s).
+Poetry is being used in the pipeline that generates the documentation for a more reliable process (thanks to its reproducibility).
+
+Poetry v2 is required to ensure that the same dependencies specification file can be also used with other tools (like PIP), thanks to its conformance with [PEP-518](https://peps.python.org/pep-0518/).
+
+In order to install the dependencies, simply run `poetry install` from the top directory of this repository.
+With this the preparation is done.
+
+#### Python PIP
+
+Python PIP is the most basic dependency manager in the Python ecosystem and is therefore available almost in all Python installations.
+
+It is out of the scope of this project to document how to use Python PIP, please visit <https://packaging.python.org/en/latest/tutorials/installing-packages/> to help yourself.
+
+In order to install the dependencies, simply run `pip install <pyproject.toml path>`, being _<pyproject.toml path>_ the path to the file under that name provided in the top directory of this repository.
+With this the preparation is done.
+
+### Generation of the Documentation
+
+Once the required tools have been installed as documented in the [Preparation](#preparation) section, these tools can be used to:
+
+1. [Optional] [Only for LinkML specified resources] Validate the input for the MarkDown document generation.
+2. [Only for LinkML specified resources] Generate all the needed MarkDown documents.
+3. Generate the HTML documents.
+
+As mentioned in a previous section, as of now only some of the resources are being specified in LinkML and are being used to generate the MarkDown documents.
+Steps 1. and 2. only apply to those documents.
+
+Currently two Bash scripts are being provided the directory `doc-generation` to simplify steps 1. and 2.
+
+The input for the generation of the MarkDown documents is provided in the directory `[src](./src/)`.
+
+#### Validate input for MarkDown Generation
+
+The script [check-examples.bash](./doc-generation/check-examples.bash) checks:
+
+- the validity of the LinkML resource definitions (AKA schemas), and
+- the validity of provided examples and counter-examples according the resource definitions
+
+"Counter-examples" are examples that should be recognized as invalid, when checked against the resource definitions.
+
+#### Generate MarkDown Documents
+
+The script [generate-documentation.bash](./doc-generation/generate-documentation.bash) generates MarkDown documents for the resources specified in LinkML format.
+
+The LinkML specification documents can be found in the directory [src](./src/) and the resulting MarkDown documents are integrated with the other MarkDown documents in the directory [system-design](./system-design/).
+
+#### Generate HTML Documents
+
+The documentation gets converted into HTML for public availability using `mkdocs`.
+
+MkDocs cannot only convert MarkDown documents into HTML documentation (using `mkdocs build`), but is can also start a webserver (using `mkdocs serve`) for local rendering of the documentation on a web browser.
+
+### Other information
+
+Each resource description has a responsible person which can decide to use LinkML to generate the MarkDown documentation or to write the MarkDown documentation manually.
+
+Transforming a manually written MarkDown document into one generated out of LinkML is not a one-direction road.
+Going back to manually written (or generated differently) MarkDown documents is as easy as committing the MarkDown documents generated out of LinkML and disabling the generation.
+
