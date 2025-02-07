@@ -14,4 +14,9 @@ Contributions are encouraged and welcome! Contributors to the specification are 
 
 Margo contributors contributing to this draft specification have made those contributions subject to the Open Web Foundation Contributor License Agreement Contribution Copyright Grant, available at [Open Web Foundation - CLA Copyright Grant 0.9](https://www.openwebfoundation.org/the-agreements/the-owf-0-9-agreements-necessary-claims/cla-copyright-grant-0-9).
 
-Copyright ©️ 2024 Margo.
+Copyright ©️ 2025 Margo.
+
+
+
+## TWG Documents
+- [ ] All documents discussed at the TWG level can be [found here](https://drive.google.com/drive/folders/1et9nZXHUgJ_4IehcyWQdxo3XRpIKcWBS?usp=sharing)
