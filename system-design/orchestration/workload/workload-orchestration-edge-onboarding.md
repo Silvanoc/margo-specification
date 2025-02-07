@@ -13,7 +13,56 @@ In order for the workload orchestration solution to manage the edge device's wor
 1. The device's management client receives the URL for the Git repository containing its desired state and an associated access token for authentication
 1. The [device capabilities](./device-capability-reporting.md) information is sent from the device to the workload orchestration web service using the [Device API](../../margo-api-reference/workload-api/device-api/device-capabilities.md)
 
-![Margo Management Interface Operational Flow Diagram (svg)](../../figures/margo-interface-generic.drawio.svg)
+``` mermaid
+sequenceDiagram
+    %%{init: {'sequence': {'mirrorActors': false}}}%%
+    autonumber
+    participant device as Device
+    actor user as End User
+    participant rendezvous as Rendezvous Server
+    participant wos as WOS
+    participant git as WOS: Device Git Repo   
+    note over device, git: Workload orchestration onboarding
+    user -->> device: Get device id and cert
+    activate device
+        device -->> user: return
+    deactivate device
+    user -->> wos: Provides device id and cert to pre-register device in end user's tenant 🔐
+     
+    %%note over device, rendezvous: FIDO
+    user -->> rendezvous: Provides WOS URL
+    device -->>+ rendezvous: Looks up WOS URL
+    rendezvous -->>- device: return
+    device -->>+ wos: Request WOS' public signing cert 🔓
+    wos -->- device: return
+    device -->>+ wos: Send onboard request, device id and certificate 🔓
+    wos -->> wos: Vaidates device id and cert with onboarding registry
+    wos -->- device: returns URL to check onboarding status
+    
+    loop until onboarding status is active   
+        device -->>+ wos: Checks onboarding status providing device id and certificate 🔓
+        wos -->> wos: Validates device id and cert with onboarding registry
+        wos -->- device: returns in progress
+    end
+    device -->>+ wos: Checks onboarding status providing device id and certificate 🔓
+    wos -->> wos: Validates device id and cert with onboarding registry
+    wos -->- device: returns git repo URL and GitOps token, encrypted client id, encrypted client secret
+    
+    device -->> wos: Uploads device capabilities
+    note over device, git: Workload deployment
+    loop Until end of time
+        device -->>+ git: Checks for updates to desired state 🔐
+        git -->>- device: return
+        opt
+            device -->> wos: Requests new GitOps token 🔐
+            wos -->> device: return
+        end
+        device -->> device: Applies new desired state
+        device -->> wos: Sends state 🔐
+        device -->> wos: Sends state 🔐
+        device -->> wos: Sends final state 🔐
+    end    
+```
 > Action: FIDO Device onboarding has not been finalized as the standard onboarding solution. Further discussion/investigations are needed. 
 
 ### Configuring the Workload Orchestration Web Service URL
