@@ -16,7 +16,7 @@ Margo contributors contributing to this draft specification have made those cont
 
 Copyright ©️ 2025 Margo.
 
+***
 
-
-## TWG Documents
-- [ ] All documents discussed at the TWG level can be [found here](https://drive.google.com/drive/folders/1et9nZXHUgJ_4IehcyWQdxo3XRpIKcWBS?usp=sharing)
+## TWG Discussion Documents
+All documents discussed at the TWG level can be [found here](https://drive.google.com/drive/folders/1et9nZXHUgJ_4IehcyWQdxo3XRpIKcWBS?usp=sharing)
