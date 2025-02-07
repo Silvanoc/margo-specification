@@ -12,6 +12,7 @@ nav:
       - app-interoperability/application-package-definition.md
       - app-interoperability/workload-orch-to-app-reg-interaction.md
       - app-interoperability/publishing-application-observability-data.md
+      - app-interoperability/local-registries.md
   - Device Interoperability:
       - device-interoperability/device-requirements.md
       - device-interoperability/collecting-application-observability-data.md
