@@ -61,6 +61,7 @@ sequenceDiagram
         device ->> wos: Sends final state 🔐
     end    
 ```
+
 > Action: FIDO Device onboarding has not been finalized as the standard onboarding solution. Further discussion/investigations are needed. 
 
 ### Configuring the Workload Orchestration Web Service URL
