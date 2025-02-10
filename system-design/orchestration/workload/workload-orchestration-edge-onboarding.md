@@ -27,10 +27,12 @@ sequenceDiagram
     device -->>- user: return
     user ->> wos: Provides device id and cert to pre-register device in end user's tenant 🔐
      
-    %%note over device, rendezvous: FIDO
-    user ->> rendezvous: Provides WOS URL
-    device ->>+ rendezvous: Looks up WOS URL
-    rendezvous -->>- device: return
+    alt FIDO: client-initiated rendezvous
+        user ->> rendezvous: Provides WOS URL
+    else FIDO: Discoverable credentials
+        device ->>+ rendezvous: Looks up WOS URL
+        rendezvous -->>- device: return
+    end
     device ->>+ wos: Request WOS' public signing cert 🔓
     wos -->>- device: return
     device ->>+ wos: Send onboard request, device id and certificate 🔓
