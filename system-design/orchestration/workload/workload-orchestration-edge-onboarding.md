@@ -66,7 +66,7 @@ sequenceDiagram
 
 ### Configuring the Workload Orchestration Web Service URL
 
-> Action: Ideally this URL is discoverable instead of having to manually enter it but we still need to determine if there is a good way to make this discoverable by using something like the FDO Rendezvous service or multicast DNS. Also, once we determine how the Margo compliant device onboarding and orchestration is going to work it will probably impact this.
+> Action: Ideally this URL is discoverable instead of having to manually enter it but we still need to determine if there is a good way to make this discoverable by using something like the FIDO Rendezvous service or multicast DNS. Also, once we determine how the Margo compliant device onboarding and orchestration is going to work it will probably impact this.
 
 To ensure the management client is configured to communicate with the correct workload orchestration web service, the device's management client needs to be configured with the expected URL. The device vendor MUST provide a way for the end user to manually set the URL the device's management client uses to communicate with the workload orchestration solution chosen by the end user.
 
