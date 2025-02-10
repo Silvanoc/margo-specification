@@ -23,42 +23,42 @@ sequenceDiagram
     participant wos as WOS
     participant git as WOS: Device Git Repo   
     note over device, git: Workload orchestration onboarding
-    user -->>+ device: Get device id and cert
+    user ->>+ device: Get device id and cert
     device -->>- user: return
-    user -->> wos: Provides device id and cert to pre-register device in end user's tenant 🔐
+    user ->> wos: Provides device id and cert to pre-register device in end user's tenant 🔐
      
     %%note over device, rendezvous: FIDO
-    user -->> rendezvous: Provides WOS URL
-    device -->>+ rendezvous: Looks up WOS URL
+    user ->> rendezvous: Provides WOS URL
+    device ->>+ rendezvous: Looks up WOS URL
     rendezvous -->>- device: return
-    device -->>+ wos: Request WOS' public signing cert 🔓
+    device ->>+ wos: Request WOS' public signing cert 🔓
     wos -->>- device: return
-    device -->>+ wos: Send onboard request, device id and certificate 🔓
-    wos -->> wos: Validates device id and cert with onboarding registry
+    device ->>+ wos: Send onboard request, device id and certificate 🔓
+    wos ->> wos: Validates device id and cert with onboarding registry
     wos -->>- device: returns URL to check onboarding status
     
     loop until onboarding status is active   
-        device -->>+ wos: Checks onboarding status providing device id and certificate 🔓
-        wos -->> wos: Validates device id and cert with onboarding registry
+        device ->>+ wos: Checks onboarding status providing device id and certificate 🔓
+        wos ->> wos: Validates device id and cert with onboarding registry
         wos -->>- device: returns in progress
     end
-    device -->>+ wos: Checks onboarding status providing device id and certificate 🔓
-    wos -->> wos: Validates device id and cert with onboarding registry
+    device ->>+ wos: Checks onboarding status providing device id and certificate 🔓
+    wos ->> wos: Validates device id and cert with onboarding registry
     wos -->>- device: returns git repo URL and GitOps token, encrypted client id, encrypted client secret
     
-    device -->> wos: Uploads device capabilities
+    device ->> wos: Uploads device capabilities
     note over device, git: Workload deployment
     loop Until end of time
-        device -->>+ git: Checks for updates to desired state 🔐
+        device ->>+ git: Checks for updates to desired state 🔐
         git -->>- device: return
         opt
-            device -->> wos: Requests new GitOps token 🔐
+            device ->> wos: Requests new GitOps token 🔐
             wos -->> device: return
         end
-        device -->> device: Applies new desired state
-        device -->> wos: Sends state 🔐
-        device -->> wos: Sends state 🔐
-        device -->> wos: Sends final state 🔐
+        device ->> device: Applies new desired state
+        device ->> wos: Sends state 🔐
+        device ->> wos: Sends state 🔐
+        device ->> wos: Sends final state 🔐
     end    
 ```
 > Action: FIDO Device onboarding has not been finalized as the standard onboarding solution. Further discussion/investigations are needed. 
