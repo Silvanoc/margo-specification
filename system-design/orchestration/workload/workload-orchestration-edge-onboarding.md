@@ -34,7 +34,7 @@ sequenceDiagram
     device -->>+ wos: Request WOS' public signing cert 🔓
     wos -->>- device: return
     device -->>+ wos: Send onboard request, device id and certificate 🔓
-    wos -->> wos: Vaidates device id and cert with onboarding registry
+    wos -->> wos: Validates device id and cert with onboarding registry
     wos -->>- device: returns URL to check onboarding status
     
     loop until onboarding status is active   
