@@ -23,10 +23,8 @@ sequenceDiagram
     participant wos as WOS
     participant git as WOS: Device Git Repo   
     note over device, git: Workload orchestration onboarding
-    user -->> device: Get device id and cert
-    activate device
-        device -->> user: return
-    deactivate device
+    user -->>+ device: Get device id and cert
+    device -->>- user: return
     user -->> wos: Provides device id and cert to pre-register device in end user's tenant 🔐
      
     %%note over device, rendezvous: FIDO
