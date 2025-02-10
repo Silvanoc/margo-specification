@@ -32,19 +32,19 @@ sequenceDiagram
     device -->>+ rendezvous: Looks up WOS URL
     rendezvous -->>- device: return
     device -->>+ wos: Request WOS' public signing cert 🔓
-    wos -->- device: return
+    wos -->>- device: return
     device -->>+ wos: Send onboard request, device id and certificate 🔓
     wos -->> wos: Vaidates device id and cert with onboarding registry
-    wos -->- device: returns URL to check onboarding status
+    wos -->>- device: returns URL to check onboarding status
     
     loop until onboarding status is active   
         device -->>+ wos: Checks onboarding status providing device id and certificate 🔓
         wos -->> wos: Validates device id and cert with onboarding registry
-        wos -->- device: returns in progress
+        wos -->>- device: returns in progress
     end
     device -->>+ wos: Checks onboarding status providing device id and certificate 🔓
     wos -->> wos: Validates device id and cert with onboarding registry
-    wos -->- device: returns git repo URL and GitOps token, encrypted client id, encrypted client secret
+    wos -->>- device: returns git repo URL and GitOps token, encrypted client id, encrypted client secret
     
     device -->> wos: Uploads device capabilities
     note over device, git: Workload deployment
