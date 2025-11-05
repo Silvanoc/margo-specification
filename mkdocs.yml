@@ -32,8 +32,9 @@ nav:
           - specification/margo-management-interface/device-capabilities.md
           - specification/margo-management-interface/desired-state.md
           - specification/margo-management-interface/deployment-status.md
-      - Application Package:
+      - Applications:
           - specification/application-package/application-description.md
+          - specification/application-package/application-registry.md
       - Margo Devices:
           - specification/margo-devices/device-requirements.md
       - Observability: 

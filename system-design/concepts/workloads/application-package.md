@@ -13,15 +13,14 @@ The application package has the following file/folder structure:
 └── resources                      # OPTIONAL folder with application files (e.g., icon, license file, release notes) that may be used for displaying additional information about the application
 ```
 
-An application aggregates one or more [OCI Containers](https://github.com/opencontainers). While the application package is made available in an [application registry](./application-registry.md), the referenced OCI artifacts are stored in a remote or [local registry](../../concepts/workloads/local-registries.md). 
+An application aggregates one or more [components](../personas-and-definitions/software-composition.md), which comprise of one or more [OCI Containers](https://github.com/opencontainers). While the application package is made available in an [Application Registry](./application-registry.md), the referenced components are stored in a Component Registry, and the linked containers are provided via a OCI Container Registry. Registries can be remote or [local](../../concepts/workloads/local-registries.md). 
 
 > **Note**  
 > Application catalogs or marketplaces are out of scope for Margo. The exact requirements of the marketing material shall be defined by the application marketplace beyond outlined mandatory content.
 
-The [deployment profiles](../../specification/application-package/application-description.md#deploymentprofile-attributes) specified in the application description SHALL be defined as Helm Chart components AND/OR Compose components.
-
-- To target devices, which run Kubernetes, applications must be packaged as Helm charts using [Helm (version 3)](https://helm.sh/docs/topics/charts/).
-- To target devices, which deploy applications using [Compose](https://www.compose-spec.io/), applications must be packaged as what Margo calls a Compose Archive, i.e., a tarball file containing the `compose.yaml` file and any additional artifacts referenced by the Compose file (e.g., configuration files, environment variable files, etc.). Margo recommends to digitally sign this package and to specify the location of the public key in the `ApplicationDescription` (see `keyLocation` [here](../../specification/application-package/application-description.md#componentproperties-attributes)). When digitally signing the package PGP encryption MUST be used.
+The [deployment profiles](../../specification/application-package/application-description.md#deploymentprofile-attributes) specified in the application description SHALL be defined as Helm Chart components AND/OR Compose Archive components:
+- To target devices, which run Kubernetes, application components must be Helm charts using [Helm (version 3)](https://helm.sh/docs/topics/charts/).
+- To target devices, which deploy applications using [Compose](https://www.compose-spec.io/), applications must be packaged as what Margo calls a *Compose Archive*, i.e., a tarball file containing the `compose.yaml` file and any additional artifacts referenced by the Compose file (e.g., configuration files, environment variable files, etc.). Margo recommends to digitally sign this package and to specify the location of the public key in the `ApplicationDescription` (see `keyLocation` [here](../../specification/application-package/application-description.md#componentproperties-attributes)). When digitally signing the package PGP encryption MUST be used.
 
 > **Investigation Needed**: Question: do we need to specify the location of a SHA256 hash for the Compose Archive also (similar to the PGP key) in the ApplicationDescription? 
 > We will also discuss how we should handle secure container registries that require a username and password.
