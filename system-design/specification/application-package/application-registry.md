@@ -93,6 +93,21 @@ To query a subset of tags, the following query parameters MUST be implemented by
 * ``n=<integer>`` (optional, limits results to n tags)
 * ``last=<tagname>`` (optional, starts list of tags after ``<tagname>``)
 
+The response of the HTTP ``GET`` request according to [end-8a/end-8b](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md#endpoints) is a list of tags, which comply with the versions of available Application Packages. According to OCI_spec, upon success, the response MUST be a json body in the following format:
+
+```json
+{
+  "name": "<name>",
+  "tags": [
+    "<tag1>", # each tag MUST be the value of the 'metadata.version' of the associated Application Package's Application Description document.
+    "<tag2>",
+    "<tag3>"
+  ]
+}
+```
+
+Thereby, a listed tag of an image manifest MUST be the same as the value of the key ``metadata.version`` as specified in the Application Description document of the associated Application Package.
+
 #### Example A:
 
 Request: GET ``http://famous-app-registry/v2/northstar-industrial-applications/app1/tags/list``
@@ -125,8 +140,8 @@ Response:
 ```
 
 ### Pull OCI Image Manifest of Application Package
-This must be implemented according to OCI_spec endpoint [end-3](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md#endpoints).
-Pulls an OCI image manifest of a specified version, which belongs to a margo Application Package.
+
+The interface to retrieve the OCI image manifest of a specified version, which belongs to an Application Package, MUST be implemented according to OCI_spec endpoint [end-3](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md#endpoints).
 The `{reference}` is the `tag` of an OCI image manifest. The `tag` has been discovered via the [listing of app versions](#list-margo-application-versions).
 `{name}` is the namespace of the repository.
 
