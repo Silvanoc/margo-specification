@@ -1,33 +1,32 @@
 # Application Registry
 
-This section specifies the API of the `Application Registry` and the exchange of an [Application Package](./application-package-definition.md), defined through an [Application Description](../../specification/application-package/) file, from an Application Developer to the Workload Fleet Manager (WFM). The `Application Registry` is designed as an `OCI Registry`, i.e., it offers an API compliant with the [OCI Registry API (v1.1.0)](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md) for digital artifact distribution. This way, the Application Registry hosts the parts of an [Application Package](https://specification.margo.org/app-interoperability/application-package-definition/) in form of `blobs` and uses `image manifests` according to [OCI Image specification](https://github.com/opencontainers/image-spec/blob/v1.0.1/manifest.md)) to list a set of `layers`, each pointing at a blob.
-
+The interactions of an `Application Registry` are described [here](../../concepts/workloads/application-registry.md) from a conceptual view. This section formally specifies the API of the `Application Registry` and the exchange of an [Application Package](./application-package-definition.md), defined through an [Application Description](../../specification/application-package/) file, from an Application Developer to the Workload Fleet Manager (WFM). The `Application Registry` is designed as an `OCI Registry`, i.e., it offers an API compliant with the [OCI Registry API (v1.1.0)](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md) for digital artifact distribution. This way, the Application Registry hosts the parts of an [Application Package](https://specification.margo.org/app-interoperability/application-package-definition/) in form of `blobs` and uses `image manifests` according to [OCI Image specification](https://github.com/opencontainers/image-spec/blob/v1.0.1/manifest.md)) to list a set of `layers`, each pointing at a blob.
 
 ## Overview of API Endpoints
 
-The Application Catalog / WFM interacts with the Application Registry using standard OCI Registry API endpoints:
+The WFM interacts with the Application Registry using standard OCI Registry API endpoints:
 
-* Tags: `/v2/{name}/tags/list` for listing available versions of the Application Package
-* Manifest: `/v2/{name}/manifests/{reference}` for retrieving an image manifest (identifed through the `{reference}`) that lists layers, which are part of the Application Package.
+* Tags: `/v2/{name}/tags/list` for listing available versions of an Application Package
+* Manifest: `/v2/{name}/manifests/{reference}` for retrieving an image manifest (identifed through the `{reference}`) that lists layers, which represent the parts of the Application Package.
 * Blob: `/v2/{name}/blobs/{digest}` for downloading parts of the Application Package
 
 `{name}` is the namespace of the repository, which needs to be directly communicted by the App Developer to the WFM vendor. It could be for example a combination of the organization's and application's name.
 
-Further details on how to use these API enspoints are specified below [towards App Developer](#margo-application-registry-api-endpoint-definitions-towards-app-developer-aligned-with-oci_spec) and [towards WFM](#margo-application-registry-api-endpoint-definitions-towards-wfm-aligned-with-oci_spec).
+Further details on how to use these API endpoints are specified below [towards App Developer](#margo-application-registry-api-endpoint-definitions-towards-app-developer-aligned-with-oci_spec) and [towards WFM](#margo-application-registry-api-endpoint-definitions-towards-wfm-aligned-with-oci_spec).
 
 ## Authentication & Authorization & Security
-This proposal recommends that margo centrally defines authentication & authorization (& ssecurity) mechanisms, e.g., recommending the use of OAuth 2.0 with the following workflow:
+Margo recommends the use of an Authentication Service within the interaction of WFM and Application Registry as conceptually described [here](../../concepts/workloads/application-registry.md), e.g., implemented using OAuth 2.0. This involves the following workflow:
 
 * WFM obtains credentials during onboarding
 * WFM requests a token from an Authentication Service
 * WFM uses the token for subsequent API calls to the Application Registry
 * Application Registry validates the token and enforces access control
 
-All communications should use TLS 1.3+ to ensure transport security.
+Thereby, all communications must use TLS 1.3+ to ensure transport security.
 
-> However, Authentication & Authorization & Security mechanisms should be defined centrally and homogeneously across margo. Hence, it is out of scope of this proposal.
+> Note: Authentication & Authorization & Security mechanisms should be defined centrally and homogeneously across margo. Hence, it is not further defined here.
 
-Further, tools such as [cosign](https://github.com/sigstore/cosign) can be employed for signing artifacts uploaded to the Application Registry and storing the signatures alongside the artifacts they verify.
+Further, tools such as [cosign](https://github.com/sigstore/cosign) may be employed for signing artifacts uploaded to the Application Registry and storing the signatures alongside the artifacts they verify.
 
 ## Reference Implementation
 A reference implementation can be found [here](https://github.com/margo/app-package-definition-wg/blob/main/application-registry-example/app_registry_as_oci_registry.md). It utilizes:

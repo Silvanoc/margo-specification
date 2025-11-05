@@ -1,6 +1,6 @@
 # Application Registry
 
-The margo specification differentiates 4 different kinds of registries: *Application Registries*, *Component Registries*, and *Container Registries* as well as *Marketplaces*.
+The margo specification differentiates 4 kinds of registries: *Application Registries*, *Component Registries*, and *Container Registries* as well as *Marketplaces*.
 
 1. An **Application Registry** hosts Application Packages that define through their [Application Description](../../specification/application-package/application-description.md) the application as one or multiple Components.
 2. A **Component Registry** hosts the Components (which are deployable as *workloads*) and are provided  as **Helm Charts** or **Compose Archives**.
