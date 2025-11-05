@@ -84,7 +84,7 @@ sequenceDiagram
 
 The interface to retrieve the list of versions of an Application Package MUST be implemented according to OCI_spec endpoint [end-8a](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md#endpoints). 
 
-To get a list of available versions of an Application Package, an HTTP ``GET`` request to a resource path MUST be performed in the following format: `/v2/{name}/tags/list`. The `{name}` variable is the namespace of the repository, which was communicted by the App Developer to the WFM vendor.
+To get a list of available versions of an Application Package, an HTTP ``GET`` request to a resource path MUST be performed in the following format: `/v2/{name}/tags/list`. The `{name}` variable is the namespace of the Application Package repository, which was communicted by the App Developer to the WFM vendor.
 
 The HTTP headers of the ``GET`` request MAY include ```Authorization: Bearer <token>``` for including the interaction with the [Authentication Service](/specification/system-design/concepts/workloads/application-registry.md).
 
@@ -142,31 +142,19 @@ Response:
 ### Pull OCI Image Manifest of Application Package
 
 The interface to retrieve the OCI image manifest of a specified version, which belongs to an Application Package, MUST be implemented according to OCI_spec endpoint [end-3](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md#endpoints).
+
+To pull an Application Package, an HTTP ``GET`` request to a resource path MUST be performed in the following format: 
+`/v2/{name}/manifests/{reference}`. 
 The `{reference}` is the `tag` of an OCI image manifest. The `tag` has been discovered via the [listing of app versions](#list-margo-application-versions).
-`{name}` is the namespace of the repository.
+The `{name}` variable is the namespace of the Application Package repository.
 
-``` GET /v2/{name}/manifests/{reference} ```
-
-#### Headers:
-
-`Authorization: Bearer <token>`
-> However, security mechanism needs to be margo-centrally defined.
-
-`Accept: application/vnd.oci.image.manifest.v1+json`
-
-#### Success Response:
-
-200 OK with OCI image manifest content
-
-#### Fail Response:
-
-404 Not Found if OCI image manifest doesn't exist
+The HTTP headers of the ``GET`` request MAY include ```Authorization: Bearer <token>``` for including the interaction with the [Authentication Service](/specification/system-design/concepts/workloads/application-registry.md).
 
 #### OCI Image Manifest as Response from Application Registry:
 
-In the margo context, OCI image manifests contain pointers to all parts of an Application Package within an Application Registry. 
+The sucessful response of the HTTP ``GET`` request is an OCI image manifest (as defined in the OCI_spec), which MUST contain pointers to all parts of an Application Package within the Application Registry.
 
-Each ``version`` of an Application Pacakage has its own OCI image manifest.
+Each version of an Application Package MUST have its own OCI image manifest.
 
 The ``schemaVersion`` of the OCI image manifest needs to be ``2``.
 
@@ -174,15 +162,12 @@ The ``artifactType`` of the OCI image manifest must be ``application/vnd.margo.a
 
 The ``config`` object must be declared as empty by defining its ``mediaType`` as ``application/vnd.oci.empty.v1+json``. 
 
-Each element of the ``layers`` array contains a reference (so called `digests`) to an artifact (so called `blobs`) that is part of the Application Package.
-Each artifact of an Application Package must be listed as an element of the ``layers`` array.
+Each element of the ``layers`` array contains a reference (so called `digests`) to an artifact (so called `blobs`) that is a part of the Application Package.
 
-The [Application Description](https://specification.margo.org/margo-api-reference/workload-api/application-package-api/application-description/) of the Application Package must be referred to in one element of the ``layers`` array. The ``mediaType`` of this layer/blob must be ``application/vnd.margo.app.description.v1+yaml``.
+Each Application Package part must be listed as an element of the ``layers`` array:
 
-Each [application resource](https://specification.margo.org/app-interoperability/application-package-definition/), which is an additional file associated with the application (e.g., manual, icon, release notes, license file, etc.), must be referred to in an element of the ``layers`` array and an ``annotation`` must be added to this element, which has the annotation key ``org.margo.app.resource``, and the annotation value must reflect the dotted path to the this resource in the Application Description. 
-E.g., an application icon stored as the file ``resources/margo.jpg`` will be referenced in the Application Description   under ``metadata.catalog.application.icon: resources/margo.jpg`` and in the OCI image manifest, the respective layer of the icon resource has the annotation ``org.margo.app.resource`` with the value ``metadata.catalog.application.icon`` (see also OCI image manifest example below).
-
-
+* The [Application Description](https://specification.margo.org/margo-api-reference/workload-api/application-package-api/application-description/) of the Application Package must be referred to in one element of the ``layers`` array, where the ``mediaType`` of this layer/blob must be ``application/vnd.margo.app.description.v1+yaml``.
+* Each [application resource](https://specification.margo.org/app-interoperability/application-package-definition/), which is an additional file associated with the application (e.g., manual, icon, release notes, license file, etc.), must be referred to in an element of the ``layers`` array. Such a layer must have an ``annotation``, which has the annotation key ``org.margo.app.resource``, and the annotation value must reflect the dotted path to the this resource in the [Application Description file](https://specification.margo.org/margo-api-reference/workload-api/application-package-api/application-description/). E.g., an application icon stored as the file ``resources/margo.jpg`` is referenced in the Application Description under ``metadata.catalog.application.icon: resources/margo.jpg`` and in the OCI image manifest, the respective layer of the icon resource has the annotation ``org.margo.app.resource`` with the value ``metadata.catalog.application.icon`` (see also OCI image manifest example below).
 
 The following response example is a margo-specific OCI image manifest following the [OCI Image Manifest Specification](https://github.com/opencontainers/image-spec/blob/v1.0.1/manifest.md) and the above defined specifics:
 
@@ -264,23 +249,11 @@ The following response example is a margo-specific OCI image manifest following 
 
 ### Get Parts of Application Package
 
-This must be implemented according to OCI_spec endpoint [end-2](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md#endpoints).
-Retrieves a margo Application Description or Appliction Resource by pulling a blob. 
-`{digest}` is the blobs digest as listed in the application's OCI image manifest that has been [retrieved earlier](#pull-margo-application-manifest).
-`{name}` is the namespace of the repository.
+The interface to retrieve Application Package parts, i.e., Application Description or Appliction Resource (e.g., icon, license, etc.), MUST be implemented according to OCI_spec endpoint [end-2](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md#endpoints) by pulling a blob.
 
+To pull such a blob, an HTTP ``GET`` request to a resource path MUST be performed in the following format: 
+`/v2/{name}/blobs/{digest}`. 
+The `{digest}` is the blobs digest as listed in the application's OCI image manifest that has been [retrieved earlier](#pull-margo-application-manifest).
+The `{name}` variable is the namespace of the Application Package repository.
 
-`GET /v2/{name}/blobs/{digest}`
-
-#### Headers:
-
-`Authorization: Bearer <token>`
-> However, security mechanism needs to be margo-centrally defined.
-
-#### Success Response:
-
-`200 OK with blob content`
-
-#### Fail Response:
-
-`404 Not Found if blob doesn't exist`
+The HTTP headers of the ``GET`` request MAY include ```Authorization: Bearer <token>``` for including the interaction with the [Authentication Service](/specification/system-design/concepts/workloads/application-registry.md).
