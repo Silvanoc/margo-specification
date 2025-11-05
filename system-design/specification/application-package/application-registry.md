@@ -28,20 +28,42 @@ Thereby, all communications must use TLS 1.3+ to ensure transport security.
 
 Further, tools such as [cosign](https://github.com/sigstore/cosign) may be employed for signing artifacts uploaded to the Application Registry and storing the signatures alongside the artifacts they verify.
 
-## Overview of Interactions
+
+
+## Uploading an Application Package
+
+As shown in the sequence diagram below, the Application Developer uploads the margo-compliant `Application Package` to the Application Registry. I.e., all parts of the Application Package MUST be pushed as blobs compliant with the [end-4a / end-4b](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md#endpoints) endpoints of the OCI_spec. 
+
+Subsequently, the Application Developer creates an OCI image manifest that lists layers of which each links to an uploaded blob. Then the manifest MUST be pushed to the Application Registry compliant to the [end-7](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md#endpoints) endpoint of the OCI_spec.
+
+The uploaded OCI image manifest MUST be adhering to the margo-specific constraints detailed [here](#manifest-as-response-from-application-registry).
+
+Subsequently, the App Developer uses a UI or other vendor-specific mechanism to communicate (either directly or indirectly, e.g. via a Marketplace) to the WFM the namespace of the Application Package's repository. 
 
 ```mermaid
 sequenceDiagram
 
-    Note over AppDeveloper: uploads margo artifacts as blobs and OCI image manifest:
-    AppDeveloper->>AppRegistry: POST /v2/{name}/blobs/uploads/
+    Note over AppDeveloper: uploads parts of Application Package as blobs:
+    AppDeveloper->>AppRegistry: push blobs
+
+    AppDeveloper->>AppRegistry: push manifest
+
+    Note over AppDeveloper: uses vendor-specific upload mechanism (e.g., UI) to enable WFM to find the Application Package:
+    AppDeveloper->>+WFM: Application Package location is: repository name in Application Registry
+```
+
+There are no further margo-specific constraints regarding the upload of the Application Package. The details defined in the [OCI_spec](https://github.com/opencontainers/distribution-spec) MUST be applied to this interface of the Application Registry. 
 
 
-    Note over AppDeveloper: uses vendor-specific upload mechanism (e.g., UI) to enable WFM to find the application:
-    AppDeveloper->>+WFM: Application location is: repository {name} in Application Registry
-    
-    Note over WFM: ... later in time:
-    Note over WFM: discovers available versions of an application:
+
+## Retrieving an Application Package
+
+The WFM has received the namespace of the repository of the Application Package at the Application Registry.
+Next, as shown in the sequence diagram below, the WFM uses the OCI_spec defined endpoints to retrieve a list of application versions
+
+```mermaid
+sequenceDiagram
+    Note over WFM: retrieve available versions of an application:
     WFM->>+AppRegistry: GET /v2/{name}/tags/list
     
     Note over WFM: retrieves the OCI image manifest of the selected application version. {reference} is tag or digest.:
@@ -49,26 +71,9 @@ sequenceDiagram
     
     AppRegistry-->>+WFM: OCI image manifest
 
-    Note over WFM: downloads application artifacts as listed in retrieved OCI image manifest:
+    Note over WFM: retrieves application artifacts as listed in OCI image manifest:
     WFM->>AppRegistry: GET /v2/{name}/blobs/{digest}
 ```
-
-
-
-## margo 'Application Registry' API Endpoint Definitions towards App Developer (aligned with OCI_spec)
-
-### Upload a margo Application Package
-
-The Application Developer uploads the margo-compliant `Application Package` to the Application Registry. I.e., the parts of the Application Package are uploaded as blobs and an OCI image manifest is created via the [end-4a / end-4b](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md#endpoints) endpoints.
-
-Thereby, the Application Developer needs to make sure the OCI image manifest will be adhering to the margo-specific constraints detailed [here](#manifest-as-response-from-application-registry).
-Other than these constraints on the OCI image manifest format, there are no further margo-specific constraints regarding the upload of the Application Package and the OCI_spec applies to this interface of the Application Registry. 
-
-This process of uploading a margo Application Package is described in the [reference implementation](https://github.com/margo/app-package-definition-wg/blob/main/application-registry-example/app_registry_as_oci_registry.md).
-
-
-
-## margo 'Application Registry' API Endpoint Definitions towards WFM (aligned with OCI_spec)
 
 ### List margo Application Package Versions
 
@@ -105,7 +110,7 @@ Use `tags` to discover available versions of a Margo application.
 }
 ```
 
-####Pull Application's OCI Image Manifest
+### Pull Application's OCI Image Manifest
 This must be implemented according to OCI_spec endpoint [end-3](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md#endpoints).
 Pulls an OCI image manifest of a specified version, which belongs to a margo Application Package.
 The `{reference}` is the `tag` of an OCI image manifest. The `tag` has been discovered via the [listing of app versions](#list-margo-application-versions).
