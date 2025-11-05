@@ -39,4 +39,6 @@ The Application Registry's API is compliant with the [OCI Registry API (v1.1.0)]
 
 
 ## Relevant Links
-Please follow the following link to view the technical reference of the [Application Registry API](../../specification/application-package/application-registry.md).
+* The technical reference of the Application Registry API is defined [here](../../specification/application-package/application-registry.md).
+
+* A reference implementation of the Application Registry is described [here](https://github.com/margo/app-package-definition-wg/blob/main/application-registry-example/app_registry_as_oci_registry.md) and includes sample applications and configuration for demonstration. It utilizes an open source OCI Registry and the [ORAS tool](https://oras.land/docs/) as the client.

@@ -28,13 +28,6 @@ Thereby, all communications must use TLS 1.3+ to ensure transport security.
 
 Further, tools such as [cosign](https://github.com/sigstore/cosign) may be employed for signing artifacts uploaded to the Application Registry and storing the signatures alongside the artifacts they verify.
 
-## Reference Implementation
-A reference implementation can be found [here](https://github.com/margo/app-package-definition-wg/blob/main/application-registry-example/app_registry_as_oci_registry.md). It utilizes:
-
-* Application Registry: Docker Registry (open source OCI Registry)
-* Client Library: ORAS (OCI Registry as Storage) tool
-* Examples: Sample applications and configuration for demonstration
-
 ## Overview of Interactions
 
 ```mermaid
