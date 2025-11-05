@@ -59,19 +59,24 @@ There are no further margo-specific constraints regarding the upload of the Appl
 ## Retrieving an Application Package
 
 The WFM has received the namespace of the repository of the Application Package at the Application Registry.
-Next, as shown in the sequence diagram below, the WFM uses the OCI_spec defined endpoints to retrieve a list of application versions
+
+Next, as shown in the sequence diagram below, the WFM uses the API endpoints defined in the OCI_spec to retrieve a list of Application Package versions (as detailed [here](#list-margo-application-package-versions)).
+
+Then, the WFM pulls the OCI image manifest of the selected version of the Application Package, with the identifying reference being a tag or digest (as detailed [here](#pull-oci-image-manifest-of-application-package)).
+
+Finally, all parts (e.g., the Application Description file, the icon, the license, etc.) of the Application Package are retrieved by pulling the respective blobs listed as layers in the image manifest (as detailed [here](#get-parts-of-application-package)). 
 
 ```mermaid
 sequenceDiagram
-    Note over WFM: retrieve available versions of an application:
+    Note over WFM: retrieve available versions of an Application Package:
     WFM->>+AppRegistry: GET /v2/{name}/tags/list
     
-    Note over WFM: retrieves the OCI image manifest of the selected application version. {reference} is tag or digest.:
+    Note over WFM: retrieves the OCI image manifest of the selected Application Package version. {reference} is tag or digest.:
     WFM->>+AppRegistry: GET /v2/{name}/manifests/{reference}
     
     AppRegistry-->>+WFM: OCI image manifest
 
-    Note over WFM: retrieves application artifacts as listed in OCI image manifest:
+    Note over WFM: retrieves parts of the Application Package as listed in OCI image manifest layers:
     WFM->>AppRegistry: GET /v2/{name}/blobs/{digest}
 ```
 
@@ -110,7 +115,7 @@ Use `tags` to discover available versions of a Margo application.
 }
 ```
 
-### Pull Application's OCI Image Manifest
+### Pull OCI Image Manifest of Application Package
 This must be implemented according to OCI_spec endpoint [end-3](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md#endpoints).
 Pulls an OCI image manifest of a specified version, which belongs to a margo Application Package.
 The `{reference}` is the `tag` of an OCI image manifest. The `tag` has been discovered via the [listing of app versions](#list-margo-application-versions).
@@ -233,7 +238,8 @@ The following response example is a margo-specific OCI image manifest following 
 
 
 
-### Get margo Application Description or Resource
+### Get Parts of Application Package
+
 This must be implemented according to OCI_spec endpoint [end-2](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md#endpoints).
 Retrieves a margo Application Description or Appliction Resource by pulling a blob. 
 `{digest}` is the blobs digest as listed in the application's OCI image manifest that has been [retrieved earlier](#pull-margo-application-manifest).
