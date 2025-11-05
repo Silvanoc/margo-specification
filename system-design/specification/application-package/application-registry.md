@@ -1,10 +1,10 @@
 # Application Registry
 
-The interactions of an `Application Registry` are described [here](../../concepts/workloads/application-registry.md) from a conceptual view. This section formally specifies the API of the `Application Registry` and the exchange of an [Application Package](./application-package-definition.md), defined through an [Application Description](../../specification/application-package/) file, from an Application Developer to the Workload Fleet Manager (WFM). The `Application Registry` is designed as an `OCI Registry`, i.e., it offers an API compliant with the [OCI Registry API (v1.1.0)](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md) for digital artifact distribution. This way, the Application Registry hosts the parts of an [Application Package](https://specification.margo.org/app-interoperability/application-package-definition/) in form of `blobs` and uses `image manifests` according to [OCI Image specification](https://github.com/opencontainers/image-spec/blob/v1.0.1/manifest.md)) to list a set of `layers`, each pointing at a blob.
+The interactions of an `Application Registry` are described [here](../../concepts/workloads/application-registry.md) from a conceptual view. This section formally specifies the API of the `Application Registry` and the exchange of an [Application Package](./application-package-definition.md), defined through an [Application Description](../../specification/application-package/) file, from an Application Developer to the Workload Fleet Manager (WFM). The `Application Registry` is designed as an `OCI Registry`, i.e., it offers an API compliant with the [OCI Registry API (v1.1.0)](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md) (called here the "OCI_spec") for digital artifact distribution. This way, the Application Registry hosts the parts of an [Application Package](https://specification.margo.org/app-interoperability/application-package-definition/) in form of `blobs` and uses `image manifests` according to [OCI Image specification](https://github.com/opencontainers/image-spec/blob/v1.0.1/manifest.md)) to list a set of `layers`, each pointing at a blob.
 
 ## Overview of API Endpoints
 
-The WFM interacts with the Application Registry using standard OCI Registry API endpoints:
+The WFM MUST interact with the Application Registry compliant to the OCI Registry API endpoints defined in the [OCI_spec](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md):
 
 * Tags: `/v2/{name}/tags/list` for listing available versions of an Application Package
 * Manifest: `/v2/{name}/manifests/{reference}` for retrieving an image manifest (identifed through the `{reference}`) that lists layers, which represent the parts of the Application Package.
@@ -12,7 +12,7 @@ The WFM interacts with the Application Registry using standard OCI Registry API 
 
 `{name}` is the namespace of the repository, which needs to be directly communicted by the App Developer to the WFM vendor. It could be for example a combination of the organization's and application's name.
 
-Further details on how to use these API endpoints are specified below [towards App Developer](#margo-application-registry-api-endpoint-definitions-towards-app-developer-aligned-with-oci_spec) and [towards WFM](#margo-application-registry-api-endpoint-definitions-towards-wfm-aligned-with-oci_spec).
+Further details on how to use these API endpoints are specified below [towards App Developer](#uploading-an-application-package) and [towards WFM](#retrieving-an-application-package).
 
 ## Authentication & Authorization & Security
 Margo recommends the use of an Authentication Service within the interaction of WFM and Application Registry as conceptually described [here](../../concepts/workloads/application-registry.md), e.g., implemented using OAuth 2.0. This involves the following workflow:
@@ -52,7 +52,7 @@ sequenceDiagram
     AppDeveloper->>+WFM: Application Package location is: repository name in Application Registry
 ```
 
-There are no further margo-specific constraints regarding the upload of the Application Package. The details defined in the [OCI_spec](https://github.com/opencontainers/distribution-spec) MUST be applied to this interface of the Application Registry. 
+There are no further margo-specific constraints regarding the upload of the Application Package. The details defined in the [OCI_spec](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md) MUST be applied to this interface of the Application Registry. 
 
 
 
@@ -82,33 +82,42 @@ sequenceDiagram
 
 ### List margo Application Package Versions
 
-This must be implemented according to OCI_spec endpoint [end-8a / end-8b](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md#endpoints).
-Use `tags` to discover available versions of a Margo application.
-`{name}` is the namespace of the repository, which needs to be directly communicted by the App Developer to the WFM vendor.
+The interface to retrieve the list of versions of an Application Package MUST be implemented according to OCI_spec endpoint [end-8a](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md#endpoints). 
 
-`GET /v2/{name}/tags/list`
+To get a list of available versions of an Application Package, an HTTP ``GET`` request to a resource path MUST be performed in the following format: `/v2/{name}/tags/list`. The `{name}` variable is the namespace of the repository, which was communicted by the App Developer to the WFM vendor.
 
-#### Headers:
+The HTTP headers of the ``GET`` request MAY include ```Authorization: Bearer <token>``` for including the interaction with the [Authentication Service](/specification/system-design/concepts/workloads/application-registry.md).
 
-```Authorization: Bearer <token>```
-> However, security mechanism needs to be margo-centrally defined.
+To query a subset of tags, the following query parameters MUST be implemented by the Application Registry as defined by OCI_spec endpoint [end-8b](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md#endpoints):
 
-#### Query Parameters:
+* ``n=<integer>`` (optional, limits results to n tags)
+* ``last=<tagname>`` (optional, starts list of tags after ``<tagname>``)
 
-* n=<integer> (optional, limits results)
-* last=<string> (optional, pagination cursor)
+#### Example A:
 
-####  Success Response:
+Request: GET ``http://famous-app-registry/v2/northstar-industrial-applications/app1/tags/list``
 
-200 OK with list of tags
-
-#### Example Response:
-
+Response: 
 ```json
 {
-  "name": "organization/app1",
+  "name": "northstar-industrial-applications/app1",
   "tags": [
     "v1.0.0",
+    "v1.1.0",
+    "latest"
+  ]
+}
+```
+
+#### Example B:
+
+Request: GET ``http://famous-app-registry/v2/northstar-industrial-applications/app1/tags/list?n=2&last=v1.0.0``
+
+Response: 
+```json
+{
+  "name": "northstar-industrial-applications/app1",
+  "tags": [
     "v1.1.0",
     "latest"
   ]
