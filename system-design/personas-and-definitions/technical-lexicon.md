@@ -37,12 +37,11 @@ Current providers supported:
 
 #### Application
 
-An application is a collection of one, or more, [Components](#component), as defined by an Application Description, and bundled within an [application package](#application-package).
+An application is a collection of one, or more, [Components](#component), as defined by an [Application Description](../specification/application-package/application-description.md), and bundled within an [Application Package](#application-package).
 
 #### Application Package
 
-An Application Package is used to distribute an [application](#application).
-According the [specification](../concepts/workloads/application-package.md), it is a folder in a Git repository referenced by URL, which contains the Application Description (that refers to contained and deployable Components) as well as associated resources (e.g., icons).
+An Application Package is used to distribute an [application](#application). The parts of an Application Package are: Application Description (that refers to contained and deployable Components) as well as associated resources (e.g., icons). While the application package is made available in an [Application Registry](./application-registry.md), the referenced components are stored in a Component Registry, and the linked containers are provided via a OCI Container Registry.
 
 #### Component
 
@@ -51,6 +50,9 @@ Currently Margo-supported components are:
 
 - Helm Chart
 - Compose Archive
+
+#### Compose Archive
+A Compose Archive is a tarball file containing the Compose file, `compose.yaml`, which is formatted according the [Compose specification](https://www.compose-spec.io/), and any additional artifacts referenced by the Compose file (e.g., configuration files, environment variable files, etc.). 
 
 #### Workload
 
@@ -79,36 +81,42 @@ Device Fleet Manager (DFM) represents a software offering that enables End Users
 
 > Note: The Device Fleet Manager is a future component of the Margo specification. This section will be expanded as the community defines device management functionality. 
 
-##### Application Registry
 
-An Application Registry holds [Application](#application) Packages.
-It is used by developers to make their applications available.
-An Application Registries MUST be a Git repository.
+#### Application Registry
 
-[Workload Fleet Managers](#workload-fleet-manager) cannot access Application Registries directly, they can only access [Application Catalogs](#application-catalog).
+An [Application Registry](../concepts/workloads/application-registry.md) hosts [Application Packages](#application-package) that define, through their [Application Description](../../specification/application-package/application-description.md), the application as one or multiple [Components](#component).
+It is used by application developers to make their applications available.
+The [API of the Application Registry](../specification/application-package/application-registry.md) is compliant with the [OCI Registry API (v1.1.0)](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md).
 
-##### Application Catalog
+> To be clarified (Arne):
+>
+> [Workload Fleet Managers](#workload-fleet-manager) cannot access Application Registries directly, they can only access [Application Catalogs](#application-catalog).
+
+#### Application Catalog
 
 An Application Catalog holds Application Packages that were preselected to be install-ready for the edge environment of a [Workload Fleet Manager](#workload-fleet-manager) to deploy them to managed [Edge Compute Devices](#edge-compute-device).
 
 An Application Catalog obtains the offered [Applications](#application) from one or more [Application Registries](#application-registry).
 
 
-##### Component Registry
+#### Component Registry
 
-A Component Registry holds [Components](#component) (e.g., Helm Charts and Compose Archives) for Application Packages.
-When an application gets deployed through a [Workload Fleet Manager](#workload-fleet-manager), the components (linked within an Application Description) are requested from the Component Registry.
+A Component Registry holds [Components](#component) (e.g., Helm Charts and Compose Archives) for [Application Packages](#application-package).
+When an application gets deployed through a [Workload Fleet Manager](#workload-fleet-manager), the components (linked within an [Application Description](../../specification/application-package/application-description.md)) are requested from the Component Registry and then deployed as [workloads](#workload). Components link to containers that are typically provided through [Container Registries](#container-registry).
+The Component Registry can be implemented, e.g., as an OCI Registry.
 
-This can be implemented, for example, as an OCI Registry.
+#### Container Registry
+A Container Registry hosts container images. [Components](#component) which are provided  as Helm Charts or Compose Archives link to such container images.
 
-#### Workload Marketplace
 
-Workload Marketplace is the location where end users purchase the rights to access [Workloads](#workload) from a vendor.  
+#### Marketplace
 
-Functional Requirements of the Workload Marketplace:
+A Marketplace is the location where end users discover and purchase the rights to access [Applications](#application) to be deployed as [Workloads](#workload) from a vendor.  
 
-- Provide users with a list of Workloads available for purchase
-- Enable users to purchase access rights to a Workload
-- Enable users with the meta data to access associated Workload Registries/Repositories
+Functional Requirements of the Marketplace:
+
+- Provide users with a list of [Applications](#application) available for purchase.
+- Enable users to purchase access rights to an [Application](#application) deployable as [workloads](#workload).
+- Enable users with the metadata to access associated [Application Registries](#application-registry).
 
 > Note: The Workload Marketplace component is out of scope for Project Margo. However, it is necessary to define to clarify the full user workflow.
