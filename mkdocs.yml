@@ -15,7 +15,7 @@ nav:
       - overview/edge-compute-devices.md
       - overview/workload-observability.md
   - Concepts:
-      - Workloads:
+      - Applications:
           - concepts/workloads/application-package.md
           - concepts/workloads/application-registry.md
           - concepts/workloads/local-registries.md

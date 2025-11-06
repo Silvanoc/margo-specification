@@ -41,7 +41,7 @@ An application is a collection of one, or more, [Components](#component), as def
 
 #### Application Package
 
-An Application Package is used to distribute an [application](#application). The parts of an Application Package are: Application Description (that refers to contained and deployable Components) as well as associated resources (e.g., icons). While the application package is made available in an [Application Registry](./application-registry.md), the referenced components are stored in a Component Registry, and the linked containers are provided via a OCI Container Registry.
+An Application Package is used to distribute an [application](#application). The parts of an Application Package are: Application Description (that refers to contained and deployable Components) as well as associated resources (e.g., icons). While the application package is made available in an [Application Registry](./application-registry.md), the referenced [components](#component) are stored in a [Component Registry](#component-registry), and the linked containers are provided via a OCI [Container Registry](#container-registry).
 
 #### Component
 
@@ -49,7 +49,7 @@ A Component is a piece of software tailored to be deployed within a customer's e
 Currently Margo-supported components are:
 
 - Helm Chart
-- Compose Archive
+- [Compose Archive](#compose-archive)
 
 #### Compose Archive
 A Compose Archive is a tarball file containing the Compose file, `compose.yaml`, which is formatted according the [Compose specification](https://www.compose-spec.io/), and any additional artifacts referenced by the Compose file (e.g., configuration files, environment variable files, etc.). 
@@ -94,7 +94,7 @@ The [API of the Application Registry](../specification/application-package/appli
 
 #### Application Catalog
 
-An Application Catalog holds Application Packages that were preselected to be install-ready for the edge environment of a [Workload Fleet Manager](#workload-fleet-manager) to deploy them to managed [Edge Compute Devices](#edge-compute-device).
+An Application Catalog resides inside or associated with a [WFM](#workload-fleet-manager) to hold [Application Packages](#application-package) that were preselected to be install-ready for the edge environment of a [Workload Fleet Manager](#workload-fleet-manager) to deploy them to managed [Edge Compute Devices](#edge-compute-device).
 
 An Application Catalog obtains the offered [Applications](#application) from one or more [Application Registries](#application-registry).
 

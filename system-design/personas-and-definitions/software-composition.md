@@ -61,7 +61,7 @@ Software at rest is made available as an Application Package, which is a folder 
 
 [Application Packages][application-package] and [Components][component] are managed and hosted separately:
 
-- [Application Registries][application-registry] store [Application Descriptions][application-description] and their associated application resources. An [Application Registry][application-registry] is implemented as a git repository.
+- [Application Registries][application-registry] store [Application Descriptions][application-description] and their associated application resources. An [Application Registry][application-registry] is compliant with the [OCI Registry API (v1.1.0)](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md).
 - [Component Registries][component-registry] store [Components][component]
 
 The following diagram shows, at hand of an example, the relationship between an [Application Package][application-package] and the [Components][component] listed within its [Deployment Profiles][deployment-profile]:
@@ -70,7 +70,7 @@ The following diagram shows, at hand of an example, the relationship between an 
 C4Component
     title Application Bundling: Example 1 - Helm and Compose deployment profiles provided
 
-    System_Boundary(ar, "Application Registry (Git)") {
+    System_Boundary(ar, "Application Registry") {
         System_Boundary(ab1, "Application Package 1") {
             Component(atb1, "Application Package", "Reference")
 
@@ -124,7 +124,7 @@ C4Component
 
     UpdateLayoutConfig($c4BoundaryInRow="1", $c4ShapeInRow="3")
 
-    System_Boundary(ar, "Application Registry (Git)") {
+    System_Boundary(ar, "Application Registry") {
         System_Boundary(ab1, "Application Package 1") {
             Component(atb1, "Application Package")
 
