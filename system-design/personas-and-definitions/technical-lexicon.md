@@ -88,9 +88,6 @@ An [Application Registry](../concepts/applications/application-registry.md) host
 It is used by application developers to make their applications available.
 The [API of the Application Registry](../specification/applications/application-registry.md) is compliant with the [OCI Registry API (v1.1.0)](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md).
 
-> To be clarified (Arne):
->
-> [Workload Fleet Managers](#workload-fleet-manager) cannot access Application Registries directly, they can only access [Application Catalogs](#application-catalog).
 
 #### Application Catalog
 
