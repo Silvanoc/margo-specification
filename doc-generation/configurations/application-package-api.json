@@ -1,5 +1,5 @@
 {
-    "root": "src/specification/application-package",
+    "root": "src/specification/applications",
     "targetclass": "ApplicationDescription",
     "schemafile": "application-description.linkml.yaml",
     "markdowndoc": "application-description.md"

@@ -99,7 +99,7 @@ jobs:
         with:
           name: generated-documentation
           path: |
-            system-design/specification/application-package/application-description.md
+            system-design/specification/applications/application-description.md
             system-design/specification/margo-management-interface/desired-state.md
 
   pages:

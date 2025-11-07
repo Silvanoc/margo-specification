@@ -10,15 +10,15 @@ nav:
       - personas-and-definitions/software-composition.md
   - Overview:
       - overview/envisioned-system-design.md
-      - overview/workloads.md
+      - overview/applications-and-workloads.md
       - overview/workload-fleet-management.md
       - overview/edge-compute-devices.md
       - overview/workload-observability.md
   - Concepts:
       - Applications:
-          - concepts/workloads/application-package.md
-          - concepts/workloads/application-registry.md
-          - concepts/workloads/local-registries.md
+          - concepts/applications/application-package.md
+          - concepts/applications/application-registry.md
+          - concepts/applications/local-registries.md
       - Workload Fleet Managers:
           - concepts/workload-fleet-managers/device-capabilities.md
           - concepts/workload-fleet-managers/workload-deployment.md
@@ -33,8 +33,8 @@ nav:
           - specification/margo-management-interface/desired-state.md
           - specification/margo-management-interface/deployment-status.md
       - Applications:
-          - specification/application-package/application-description.md
-          - specification/application-package/application-registry.md
+          - specification/applications/application-description.md
+          - specification/applications/application-registry.md
       - Margo Devices:
           - specification/margo-devices/device-requirements.md
       - Observability: 
