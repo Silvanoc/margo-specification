@@ -41,7 +41,7 @@ An application is a collection of one, or more, [Components](#component), as def
 
 #### Application Package
 
-An Application Package is used to distribute an [application](#application). The parts of an Application Package are: Application Description (that refers to contained and deployable Components) as well as associated resources (e.g., icons). While the application package is made available in an [Application Registry](./application-registry.md), the referenced [components](#component) are stored in a [Component Registry](#component-registry), and the linked containers are provided via a OCI [Container Registry](#container-registry).
+An Application Package is used to distribute an [application](#application). The parts of an Application Package are: Application Description (that refers to contained and deployable Components) as well as associated resources (e.g., icons). While the application package is made available in an [Application Registry](../concepts/workloads/application-registry.md), the referenced [components](#component) are stored in a [Component Registry](#component-registry), and the linked containers are provided via a OCI [Container Registry](#container-registry).
 
 #### Component
 
@@ -84,7 +84,7 @@ Device Fleet Manager (DFM) represents a software offering that enables End Users
 
 #### Application Registry
 
-An [Application Registry](../concepts/workloads/application-registry.md) hosts [Application Packages](#application-package) that define, through their [Application Description](../../specification/application-package/application-description.md), the application as one or multiple [Components](#component).
+An [Application Registry](../concepts/workloads/application-registry.md) hosts [Application Packages](#application-package) that define, through their [Application Description](../specification/application-package/application-description.md), the application as one or multiple [Components](#component).
 It is used by application developers to make their applications available.
 The [API of the Application Registry](../specification/application-package/application-registry.md) is compliant with the [OCI Registry API (v1.1.0)](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md).
 
@@ -102,7 +102,7 @@ An Application Catalog obtains the offered [Applications](#application) from one
 #### Component Registry
 
 A Component Registry holds [Components](#component) (e.g., Helm Charts and Compose Archives) for [Application Packages](#application-package).
-When an application gets deployed through a [Workload Fleet Manager](#workload-fleet-manager), the components (linked within an [Application Description](../../specification/application-package/application-description.md)) are requested from the Component Registry and then deployed as [workloads](#workload). Components link to containers that are typically provided through [Container Registries](#container-registry).
+When an application gets deployed through a [Workload Fleet Manager](#workload-fleet-manager), the components (linked within an [Application Description](../specification/application-package/application-description.md)) are requested from the Component Registry and then deployed as [workloads](#workload). Components link to containers that are typically provided through [Container Registries](#container-registry).
 The Component Registry can be implemented, e.g., as an OCI Registry.
 
 #### Container Registry

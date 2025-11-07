@@ -33,9 +33,9 @@ flowchart
 As shown in the figure above, an `Application Developer` uploads an [Application package](application-package.md) to an Application Registry. From there, it is available to a `Workload Fleet Manager` (WFM).
 The WFM acts as a client to pull an [Application Package](application-package.md) from the Application Registry. It would then list this Application Package on its UI (e.g., an internal `Application Catalog`) to enable the usage on its managed devices.
 
-An `Authentication Service` manages access control for the Application Registry. Hence, the WFM requests a token from there to include it into its requests to the Application Registry. The received token is then validated by the Application Registry through interaction with the Authentication Service.
+An `Authentication Service` manages access control for the Application Registry. The WFM requests a token from the Authentication Service to include in the requests to the Application Registry. The received token is then validated by the Application Registry through interaction with the Authentication Service.
 
-The Application Registry's API is compliant with the [OCI Registry API (v1.1.0)](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md). A hosted Application Package is provided by listing its parts as layers in an [image manifests](https://github.com/opencontainers/image-spec/blob/v1.0.1/manifest.md)) that can be requested through the API.
+The Application Registry's API is compliant with the [OCI Registry API (v1.1.0)](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md). A hosted Application Package is provided by listing its parts as layers in an [image manifests](https://github.com/opencontainers/image-spec/blob/v1.0.1/manifest.md) that can be requested through the API.
 
 
 ## Relevant Links
