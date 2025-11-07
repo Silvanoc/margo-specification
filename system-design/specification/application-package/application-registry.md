@@ -38,7 +38,7 @@ Subsequently, the Application Developer creates an OCI image manifest that lists
 
 The uploaded OCI image manifest MUST adhere to the Margo-specific constraints detailed [here](#oci-image-manifest-as-response-from-application-registry).
 
-Subsequently, the App Developer uses a UI or other vendor-specific mechanism to communicate (either directly or indirectly, e.g. via a Marketplace) to the WFM the namespace of the Application Package's repository. 
+Subsequently, the App Developer uses a UI or other vendor-specific mechanism to communicate (either directly or indirectly, e.g., via a Marketplace) to the WFM the namespace of the Application Package's repository. 
 
 ```mermaid
 sequenceDiagram
@@ -71,7 +71,7 @@ sequenceDiagram
     Note over WFM: retrieve available versions of an Application Package:
     WFM->>+AppRegistry: GET /v2/{name}/tags/list
     
-    Note over WFM: retrieves the OCI image manifest of the selected Application Package version. {reference} is tag or digest.:
+    Note over WFM: retrieves the OCI image manifest of the selected Application Package version. {reference} is a tag or a digest:
     WFM->>+AppRegistry: GET /v2/{name}/manifests/{reference}
     
     AppRegistry-->>+WFM: OCI image manifest
@@ -84,7 +84,7 @@ sequenceDiagram
 
 The interface to retrieve the list of versions of an Application Package MUST be implemented according to OCI_spec endpoint [end-8a](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md#endpoints). 
 
-To get a list of available versions of an Application Package, an HTTP ``GET`` request to a resource path MUST be performed in the following format: `/v2/{name}/tags/list`. The `{name}` variable is the namespace of the Application Package repository, which was communicted by the App Developer to the WFM vendor.
+To get a list of available versions of an Application Package, an HTTP ``GET`` request to a resource path MUST be performed in the following format: `/v2/{name}/tags/list`. The `{name}` variable is the namespace of the Application Package repository, which was communicated by the App Developer to the WFM vendor.
 
 The HTTP headers of the ``GET`` request MAY include ```Authorization: Bearer <token>``` for including the interaction with the [Authentication Service](../../concepts/workloads/application-registry.md).
 
@@ -93,7 +93,7 @@ To query a subset of tags, the following query parameters MUST be implemented by
 * ``n=<integer>`` (optional, limits results to n tags)
 * ``last=<tagname>`` (optional, starts list of tags after ``<tagname>``)
 
-The response of the HTTP ``GET`` request according to [end-8a/end-8b](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md#endpoints) is a list of tags, which comply with the versions of available Application Packages. According to OCI_spec, upon success, the response MUST be a json body in the following format:
+The response of the HTTP ``GET`` request according to [end-8a/end-8b](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md#endpoints) is a list of tags, which comply with the versions of available Application Packages. According to OCI_spec, upon success, the response MUST be a JSON body in the following format:
 
 ```json
 {
@@ -152,7 +152,7 @@ The HTTP headers of the ``GET`` request MAY include ```Authorization: Bearer <to
 
 #### OCI Image Manifest as Response from Application Registry:
 
-The sucessful response of the HTTP ``GET`` request is an OCI image manifest (as defined in the OCI_spec), which MUST contain pointers to all parts of an Application Package within the Application Registry.
+The successful response of the HTTP ``GET`` request is an OCI image manifest (as defined in the OCI_spec), which MUST contain pointers to all parts of an Application Package within the Application Registry.
 
 Each version of an Application Package MUST have its own OCI image manifest.
 
@@ -162,7 +162,7 @@ The ``artifactType`` of the OCI image manifest must be ``application/vnd.margo.a
 
 The ``config`` object must be declared as empty by defining its ``mediaType`` as ``application/vnd.oci.empty.v1+json``. 
 
-Each element of the ``layers`` array contains a reference (so called `digests`) to an artifact (so called `blobs`) that is a part of the Application Package.
+Each element of the ``layers`` array contains a reference (so-called `digests`) to an artifact (so-called `blobs`) that is a part of the Application Package.
 
 Each Application Package part must be listed as an element of the ``layers`` array:
 
@@ -175,7 +175,7 @@ The following response example is a Margo-specific OCI image manifest following 
 {
   "schemaVersion": 2,
   "mediaType": "application/vnd.oci.image.manifest.v1+json",
-  "artifactType": "application/vnd.margo.app.v1+json" # this MUST be the artifactType of en OCI image manifest of a Margo Application Package,
+  "artifactType": "application/vnd.margo.app.v1+json" # this MUST be the artifactType of an OCI image manifest of a Margo Application Package,
   "config": {
     "mediaType": "application/vnd.oci.empty.v1+json", # the 'config' object MUST be empty
     "digest": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
