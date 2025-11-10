@@ -91,9 +91,7 @@ The [API of the Application Registry](../specification/applications/application-
 
 #### Application Catalog
 
-An Application Catalog resides inside or associated with a [WFM](#workload-fleet-manager) to hold [Application Packages](#application-package) that were preselected to be install-ready for the edge environment of a [Workload Fleet Manager](#workload-fleet-manager) to deploy them to managed [Edge Compute Devices](#edge-compute-device).
-
-An Application Catalog obtains the offered [Applications](#application) from one or more [Application Registries](#application-registry).
+An Application Catalog is a visual representation of preselected, install-ready applications, the user of the [WFM](#workload-fleet-manager) can deploy to it's managed [Edge Compute Devices](#edge-compute-device). Application Catalogs and how they function within the WFM are out of scope for Margo.
 
 
 #### Component Registry
@@ -104,16 +102,3 @@ The Component Registry can be implemented, e.g., as an OCI Registry.
 
 #### Container Registry
 A Container Registry hosts container images. [Components](#component) which are provided  as Helm Charts or Compose Archives link to such container images.
-
-
-#### Marketplace
-
-A Marketplace is the location where end users discover and purchase the rights to access [Applications](#application) to be deployed as [Workloads](#workload) from a vendor.  
-
-Functional Requirements of the Marketplace:
-
-- Provide users with a list of [Applications](#application) available for purchase.
-- Enable users to purchase access rights to an [Application](#application) deployable as [workloads](#workload).
-- Enable users with the metadata to access associated [Application Registries](#application-registry).
-
-> Note: The Workload Marketplace component is out of scope for Project Margo. However, it is necessary to define to clarify the full user workflow.

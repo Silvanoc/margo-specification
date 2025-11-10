@@ -38,7 +38,7 @@ Subsequently, the Application Developer creates an OCI image manifest that lists
 
 The uploaded OCI image manifest MUST adhere to the Margo-specific constraints detailed [here](#oci-image-manifest-as-response-from-application-registry).
 
-Subsequently, the App Developer uses a UI or other vendor-specific mechanism to communicate (either directly or indirectly, e.g., via a Marketplace) to the WFM the namespace of the Application Package's repository. 
+Subsequently, the App Developer uses a UI or other vendor-specific mechanism to communicate (either directly or indirectly) to the WFM the namespace of the Application Package's repository. 
 
 ```mermaid
 sequenceDiagram

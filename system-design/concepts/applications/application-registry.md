@@ -1,13 +1,12 @@
 # Application Registry
 
-The Margo specification differentiates 4 kinds of registries: *Application Registries*, *Component Registries*, and *Container Registries* as well as *Marketplaces*.
+The Margo specification differentiates 3 kinds of registries: *Application Registries*, *Component Registries*, and *Container Registries*.
 
 1. An **Application Registry** hosts Application Packages that define through their [Application Description](../../specification/applications/application-description.md) the application as one or multiple [Components](../../personas-and-definitions/technical-lexicon.md#component).
 2. A **Component Registry** hosts the [Components](../../personas-and-definitions/technical-lexicon.md#component) (which are deployable as *workloads*) and are provided  as **Helm Charts** or **Compose Archives**.
 3. A **Container Registry** hosts container images referenced by those Components.
-4. A **Marketplace** lists applications to advertise them and enable purchasing for end users.
 
-Out of these 4 registries, **only the Application Registry interface is in scope** of the Margo specification and its API definition can be found [here](../../specification/applications/application-registry.md).  
+Out of these 3 registries, **only the Application Registry interface is in scope** of the Margo specification and its API definition can be found [here](../../specification/applications/application-registry.md).  
 
 The diagram below illustrates these functionalities and relationships of registries within Margo.
 
@@ -18,7 +17,6 @@ flowchart
    B -- hosted Components links to --> D[Container Registry]
    A -->|pulls Application Package | C
    F[App Developer] -->|uploads Application Package to| C
-   G["Marketplace"] -- points to Application Package --> C
    C -->|hosts 0..*| E@{ shape: docs, label: "Application Packages"} 
    C -->|validates token| H[Authentication Service] 
    A -->|requests token| H
@@ -27,7 +25,6 @@ flowchart
    style B fill:#ABC
    style C fill:#ABC
    style D fill:#ABC
-   style G fill:#ABC
 ```
 
 As shown in the figure above, an `Application Developer` uploads an [Application package](application-package.md) to an Application Registry. From there, it is available to a `Workload Fleet Manager` (WFM).
