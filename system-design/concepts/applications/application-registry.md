@@ -18,19 +18,21 @@ flowchart
    A -->|pulls Application Package | C
    F[App Developer] -->|uploads Application Package to| C
    C -->|hosts 0..*| E@{ shape: docs, label: "Application Packages"} 
-   C -->|validates token| H[Authentication Service] 
-   A -->|requests token| H
+   C s1@-->|validates token| H[Authentication Service] 
+   A s2@-->|requests token| H
    style H stroke-dasharray: 3 6
-
    style B fill:#ABC
    style C fill:#ABC
    style D fill:#ABC
+   classDef dashed stroke-dasharray: 3,6, stroke-dashoffset: 900;
+   class s1 dashed
+   class s2 dashed
 ```
 
 As shown in the figure above, an `Application Developer` uploads an [Application package](application-package.md) to an Application Registry. From there, it is available to a `Workload Fleet Manager` (WFM).
 The WFM acts as a client to pull an [Application Package](application-package.md) from the Application Registry. It would then list this Application Package on its UI (e.g., an internal `Application Catalog`) to enable the usage on its managed devices.
 
-An `Authentication Service` manages access control for the Application Registry. The WFM requests a token from the Authentication Service to include in the requests to the Application Registry. The received token is then validated by the Application Registry through interaction with the Authentication Service.
+> Note: The figure above shows an `Authentication Service` that manages access control for the Application Registry. This service and interactions with it are not yet formally defined by Margo and needs to be further discussed in the future. The idea here is that the WFM requests a token from the Authentication Service to include in requests to the Application Registry. The received token is then validated by the Application Registry through interaction with the Authentication Service.
 
 The Application Registry's API is compliant with the [OCI Registry API (v1.1.0)](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md). A hosted Application Package is provided by listing its parts as layers in an [image manifests](https://github.com/opencontainers/image-spec/blob/v1.0.1/manifest.md) that can be requested through the API.
 

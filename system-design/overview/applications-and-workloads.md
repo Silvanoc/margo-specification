@@ -1,4 +1,5 @@
-# Applications & Workloads
+# Applications
+
 
 A [workload](../personas-and-definitions/technical-lexicon.md#workload) is running software. More specifically, a workload is a running [Component](../personas-and-definitions/technical-lexicon.md#component) of an [Application Package](../concepts/applications/application-package.md) deployed to a Margo compliant [edge compute device](../personas-and-definitions/technical-lexicon.md#edge-compute-device).
 
