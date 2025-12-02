@@ -1,7 +1,6 @@
 # Applications
 
-
-A [workload](../personas-and-definitions/technical-lexicon.md#workload) is running software. More specifically, a workload is a running [Component](../personas-and-definitions/technical-lexicon.md#component) of an [Application Package](../concepts/applications/application-package.md) deployed to a Margo compliant [edge compute device](../personas-and-definitions/technical-lexicon.md#edge-compute-device).
+An application is defined as an [Application Package](../concepts/applications/application-package.md) described through an [Application Description](../specification/applications/application-description.md) and consists of deployable [components](../personas-and-definitions/technical-lexicon.md#component). A running [component](../personas-and-definitions/technical-lexicon.md#component) is called a [workload](../personas-and-definitions/technical-lexicon.md#workload). A workload runs on a Margo compliant [edge compute device](../personas-and-definitions/technical-lexicon.md#edge-compute-device).
 
 In order to help achieve Margo's interoperability [mission statement](../index.md#mission-statement) we are initially targeting [containerized](https://github.com/opencontainers) components/workloads capable of running on platforms like Kubernetes, Docker and Podman. The flexibility these platforms provide enables [workload suppliers](../personas-and-definitions/personas.md#workload-supplier) to define and package their components in a common way using [Helm](https://helm.sh/docs/) or the [Compose specification](https://github.com/compose-spec/compose-spec/blob/main/spec.md) so they can more easily be deployed to multiple compatible edge compute devices as workloads.
 

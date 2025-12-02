@@ -10,7 +10,7 @@ nav:
       - personas-and-definitions/software-composition.md
   - Overview:
       - overview/envisioned-system-design.md
-      - overview/applications-and-workloads.md
+      - overview/applications.md
       - overview/workload-fleet-management.md
       - overview/edge-compute-devices.md
       - overview/workload-observability.md
