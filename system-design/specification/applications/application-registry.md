@@ -145,7 +145,7 @@ The interface to retrieve the OCI image manifest of a specified version, which b
 
 To pull an Application Package, an HTTP ``GET`` request to a resource path MUST be performed in the following format: 
 `/v2/{name}/manifests/{reference}`. 
-The `{reference}` is the `tag` of an OCI image manifest. The `tag` has been discovered via the [listing of application package versions](#list-margo-application-package-versions).
+The `{reference}` MUST be the `tag` or `digest` of an OCI image manifest. The respective `tag` can discovered via the [listing of application package versions](#list-margo-application-package-versions).
 The `{name}` variable is the namespace of the Application Package repository.
 
 The HTTP headers of the ``GET`` request MAY include ```Authorization: Bearer <token>``` for including the interaction with the [Authentication Service](../../concepts/applications/application-registry.md).
