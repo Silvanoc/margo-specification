@@ -1,29 +1,41 @@
 # Device Capabilities
 
-Devices MUST provide the Workload Fleet Management service with its capabilities and characteristics. This is done by calling the Device API's `device capabilities` endpoint.
+Devices MUST provide the Workload Fleet Management service with its capabilities and characteristics. This is done by calling the Device API's `device capabilities` endpoint. Reporting the device capabilities is the final step in the onboarding of the device's client. 
 
 To ensure the WFM is kept up to date, the device's client MUST send updated capabilities information if any changes occur to the information originally provided (i.e., additional memory is added to the device).
 
-### Route and HTTP Methods
+- Requests to this endpoint MUST be authenticated using the HTTP Message Signature method as defined in the [Payload Security](../margo-management-interface/api-requirements-and-security.md#payload-security-method) section.
+
+## Route and HTTP Methods
 
 ```https
-POST /api/v1/device/{deviceId}/capabilities
-PUT /api/v1/device/{deviceId}/capabilities
+POST /api/v1/clients/{clientId}/capabilities
+PUT /api/v1/clients/{clientId}/capabilities
 ```
 
 ### Route Parameters
 
 |Parameter | Type | Required? | Description|
 |----------|------|-----------|------------|
-| {deviceId} | string | Y | The device's Id registered with the workload orchestration web service during onboarding.|
+| {clientId} | string | Y | The unique identifier of the (device) client registered with the WFM during onboarding. |
 
-### Request Body Attributes
+### Response Codes
+
+| Code | Description |
+|------|-------------|
+| 201 OK | The device capabilities document was added, or updated, successfully |
+| 400 Bad Request | Missing or invalid content-digest header. Ensure the SHA256 hash of the base64-encoded payload is included. |
+| 401 Unauthorized | Signature verification failed. Ensure you are signing with the correct X.509 private key.  |
+| 403 Forbidden | Client certificate is not trusted or has been revoked. |
+| 422 Unprocessable Content | Request body includes a semantic error.  |
+
+## Request Body Attributes
 
 | Field      | Type            | Required?       | Description     |
 |-----------------|-----------------|-----------------|-----------------|
-| apiVersion      | string    | Y    | Identifier of the version of the API the object definition follows.|
-| kind            | string    | Y    | Must be `DeviceCapabilities`.|
-| properties        | Properties    | Y    | Element that defines characteristics about the device. See the [Properties Fields](#properties-fields) section below. |
+| apiVersion      | string    | Y    | Identifier of the version the API resource follows.|
+| kind            | string    | Y    | Must be `DeviceCapabilitiesManifest`.|
+| properties        | Properties    | Y    | Element that defines characteristics about the device. See the [Properties Fields](#properties-attributes) section below. |
 
 ### Properties Attributes
 
@@ -74,10 +86,10 @@ Communication interface of a device.
 | --- | --- | --- | --- |
 | type | CommunicationInterfaceType |  Y  | The type of a communication interface. This can be e.g. Ethernet, WiFi, Cellular, Bluetooth, USB, CANBus, RS232. See the [CommunicationInterfaceType](#communicationinterfacetype) definition for all permissible values.|
 
-## Enumerations
+### Enumerations
 These enumerations are used as vocabularies for attribute values of the `DeviceCapabilities`.
 
-### CpuArchitectureType
+#### CpuArchitectureType
 
 | Permissible Values | Description |
 | --- | --- |
@@ -86,7 +98,7 @@ These enumerations are used as vocabularies for attribute values of the `DeviceC
 | arm64 | ARM 64-bit architecture.|
 | arm | ARM 32-bit architecture. |  
 
-### CommunicationInterfaceType
+#### CommunicationInterfaceType
 
 | Permissible Values | Description |
 | --- | --- |
@@ -98,7 +110,7 @@ These enumerations are used as vocabularies for attribute values of the `DeviceC
 | canbus | This type stands for a CANBus interface.|
 | rs232 | This type stands for a RS232 interface. |  
 
-### PeripheralType
+#### PeripheralType
 
 | Permissible Values | Description |
 | --- | --- |
@@ -109,12 +121,12 @@ These enumerations are used as vocabularies for attribute values of the `DeviceC
 | speaker | This type stands for a speaker peripheral. |
 
 
-### Example Request
+## Example Device Capabilities Payload
 
 ```json
 {
-    "apiVersion": "device.margo/v1",
-    "kind": "DeviceCapabilities",
+    "apiVersion": "device.margo.org/v1alpha1",
+    "kind": "DeviceCapabilitiesManifest",
     "properties": {
         "id": "northstarida.xtapro.k8s.edge",
         "vendor": "Northstar Industrial devices",
@@ -151,10 +163,3 @@ These enumerations are used as vocabularies for attribute values of the `DeviceC
     }
 }
 ```
-
-### Response Code
-
-| Code | Description |
-|------|-------------|
-| 201  | The device capabilities document was added, or updated, successfully |
-| 4XX-5XX | The requests was not completed successfully |
