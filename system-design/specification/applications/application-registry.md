@@ -42,7 +42,7 @@ As shown in the sequence diagram below, the Application Developer uploads the Ma
 I.e., all parts of the Application Package MUST be pushed as blobs according the ["Pushing Blobs" section of the OCI_spec](https://github.com/opencontainers/distribution-spec/blob/main/spec.md#pushing-blobs).
 Subsequently, the Application Developer creates an OCI image manifest that lists layers, each of which links to an uploaded blob.
 Then the manifest MUST be pushed to the Application Registry according the ["Pushing Manifests" section of the OCI_spec](https://github.com/opencontainers/distribution-spec/blob/main/spec.md#pushing-manifests).
-The uploaded OCI image manifest MUST adhere to the Margo-specific constraints detailed [here](#application-package-oci-manifest).
+The uploaded OCI image manifest MUST adhere to the Margo-specific constraints detailed [here](#application-package-manifest).
 Subsequently, the App Developer uses a UI or other vendor-specific mechanism to communicate (either directly or indirectly) to the WFM the namespace of the Application Package's repository. 
 
 ```mermaid
@@ -63,7 +63,7 @@ However this is an application of the [standard artifact pull workflow according
 
 The WFM has received the namespace of the repository of the Application Package at the Application Registry.
 Next, as shown in the sequence diagram below, the WFM uses the API endpoints defined in the OCI_spec to retrieve a list of Application Package versions (as detailed [here](#list-margo-application-package-versions)).
-Then, the WFM pulls the OCI image manifest of the selected version of the Application Package, with the identifying reference being a tag or digest (as detailed [here](#retrieving-oci-image-manifest-of-application-package-manifest)).
+Then, the WFM pulls the OCI image manifest of the selected version of the Application Package, with the identifying reference being a tag or digest (as detailed [here](#retrieving-application-package-manifest)).
 If high trust requirements apply on the acquisition of the application package versions, state-of-the-art mechanisms can be applied to ensure that sophisticated attacks are not possible (for example a [TUF](https://theupdateframework.com/) implementation).
 Finally, all parts (e.g., the Application Description file, the icon, the license, etc.) of the Application Package are retrieved by pulling the respective blobs listed as layers in the image manifest (as detailed [here](#retrieve-parts-of-application-package)). 
 
