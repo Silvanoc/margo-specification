@@ -16,7 +16,9 @@ Another advantage of Margo's [application description model](../concepts/applica
 
 ## Packaging & Distribution
 
-To distribute an application consisting of multiple components that are deployable as workloads, they are wrapped in an [application package](../concepts/applications/application-package.md) defined by the workload supplier who aims to provide it to Margo-compliant edge compute devices. Therefore, the workload supplier creates an application description YAML document containing information about the application and references to its components. The application package is made available in an [application registry](../concepts/applications/application-registry.md), its components (i.e., Helm Charts or Compose Archives) are stored in a remote or [local](../concepts/applications/local-registries.md) component registry, and the linked [OCI containers](https://github.com/opencontainers) are provided through an OCI container registry.
+To distribute an application consisting of multiple components that are deployable as workloads, they are wrapped in an [application package](../concepts/applications/application-package.md) defined by the workload supplier who aims to provide it to Margo-compliant edge compute devices.
+Therefore, the workload supplier creates an application description YAML document containing information about the application and references to its components.
+The application package is made available in an [application registry](../concepts/applications/application-registry.md), its components (i.e., Helm Charts or Compose Archives) are stored in a remote or [local](../concepts/applications/local-registries.md) component registry, and the linked container images are provided through an container image registry.
 
 ### Example workflow
 

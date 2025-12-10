@@ -5,24 +5,27 @@ The Application Package, which is used to [distribute an application](../../over
 - The **Application Description**: a YAML document with the element `kind` defined as `ApplicationDescription`, which is stored in a file (for example named `margo.yaml`) and contains information about the application's [metadata](../../specification/applications/application-description.md#metadata-attributes) (e.g., description, icon, release notes, license file, etc.), the application [components](../../personas-and-definitions/technical-lexicon.md#component) (e.g.,  Helm charts, Compose Archive), which are defined in [deployment configurations](../../specification/applications/application-description.md#deploymentprofile-attributes), and [configurable application parameters](../../specification/applications/application-description.md#defining-configurable-application-parameters).  There is only one YAML file in the package root of kind `ApplicationDescription`.
 - The **resources**, which are additional files associated with the application (e.g., manual, icon, release notes, license file, etc.) that may be used to provide more information about the application (e.g., in a UI such as an [application catalog](../../personas-and-definitions/technical-lexicon.md#application-catalog) of a [WFM](../../personas-and-definitions/technical-lexicon.md#workload-fleet-manager)).
 
-The Application Package is distributed via an [Application Registry](./application-registry.md) and is bundled within a **repository**, according to [OCI distribution specification](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md). All files (i.e., Application Description and resource files) belonging to the Application Package are referenced as **layers** by a **manifest** inside the repository. The layer of the Application Description file is marked with a **mediaType** value as "application/vnd.margo.app.description.v1+yaml". The layers of resource files are marked with an **annotation** called "org.margo.app.resource" and a value that indicates the kind of resource (e.g., "metadata.catalog.application.icon"). 
+The Application Package is distributed via an [Application Registry](./application-registry.md) and is bundled within a **repository**, according to [OCI distribution specification](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md). 
+The Application Package is distributed via an [Application Registry](./application-registry.md) and is bundled within a **repository**, according to [OCI distribution specification](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md).
+All files (i.e., Application Description and resource files) belonging to the Application Package are referenced as *layers* (the equivalent term **blobs** is nowadays preferred and will be used in the rest of this document) by a **manifest** inside the repository.
+The blob of the Application Description file is marked with a **mediaType** value as `application/vnd.margo.app.description.v1+yaml`.
+The blobs of resource files are marked with an according **mediaType** (see list [here](../../specification/applications/application-registry.md#margo-specific-media-types)) called `application/vnd.margo.app.icon.v1+jpeg`. 
 This is illustrated in the figure below and formally defined [here](../../specification/applications/application-registry.md).
 
 
 ``` mermaid
 classDiagram
 direction LR
-    class `my-application-description: Layer` {
+    class `my-application-description: Blob` {
 	    mediaType: "application/vnd.margo.app.description.v1+yaml"
         digest: "sha256:f6b7914..."
         size: 999
     }
 
-    class `my-resources-icon: Layer` {
-	    mediaType: "image/jpeg"
+    class `my-resources-icon: Blob` {
+	    mediaType: "application/vnd.margo.app.icon.v1+jpeg"
         digest: "sha256:sha256:451410b6adfdce..."
         size: 5065
-        annotations: ["org.margo.app.resource": "metadata.catalog.application.icon", ...]
     }
 
     class `my-margo-app-manifest: Manifest` {
@@ -30,12 +33,14 @@ direction LR
 	    artifactType: "application/vnd.org.margo.app.v1+json"
     }
 
-    `my-margo-app-manifest: Manifest` o-- `my-application-description: Layer`
-    `my-margo-app-manifest: Manifest` o-- `my-resources-icon: Layer`
+    `my-margo-app-manifest: Manifest` o-- `my-application-description: Blob`
+    `my-margo-app-manifest: Manifest` o-- `my-resources-icon: Blob`
 ```
 
 
-An application aggregates one or more [components](../../personas-and-definitions/technical-lexicon.md#component), which each link to one or more [OCI Containers](https://github.com/opencontainers). The components  referenced in the [Application Description](../../specification/applications/application-description.md) are stored in a [Component Registry](../../personas-and-definitions/technical-lexicon.md#component-registry), and the linked containers are provided via a [Container Registry](../../personas-and-definitions/technical-lexicon.md#container-registry). Registries can be remote (i.e., Internet-accessible) or [local](../../concepts/applications/local-registries.md) (i.e., accessible within a local network infrastructure of the devices). 
+An application aggregates one or more [components](../../personas-and-definitions/technical-lexicon.md#component), which each link to one or more [OCI Container Images](https://github.com/opencontainers/image-spec).
+The components  referenced in the [Application Description](../../specification/applications/application-description.md) are stored in a [Component Registry](../../personas-and-definitions/technical-lexicon.md#component-registry), and the linked container images are provided via a [Container Registry](../../personas-and-definitions/technical-lexicon.md#container-registry).
+Registries can be remote (i.e., Internet-accessible) or [local](../../concepts/applications/local-registries.md) (i.e., accessible within a local network infrastructure of the devices). 
 
 The [deployment profiles](../../specification/applications/application-description.md#deploymentprofile-attributes) specified in the [Application Description](../../specification/applications/application-description.md) are defined as Helm Chart components AND/OR [Compose Archive](../../personas-and-definitions/technical-lexicon.md#compose-archive) components. These components are being deployed as workloads on the edge devices:
 

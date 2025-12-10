@@ -41,7 +41,7 @@ An application is a collection of one, or more, [Components](#component), as def
 
 #### Application Package
 
-An Application Package is used to distribute an [application](#application). The parts of an Application Package are: Application Description (that refers to contained and deployable Components) as well as associated resources (e.g., icons). While the application package is made available in an [Application Registry](../concepts/applications/application-registry.md), the referenced [components](#component) are stored in a [Component Registry](#component-registry), and the linked containers are provided via a OCI [Container Registry](#container-registry).
+An Application Package is used to distribute an [application](#application). The parts of an Application Package are: Application Description (that refers to contained and deployable Components) as well as associated resources (e.g., icons). While the application package is made available in an [Application Registry](../concepts/applications/application-registry.md), the referenced [components](#component) are stored in a [Component Registry](#component-registry), and the linked containers are provided via a OCI [Container Image Registry](#container-image-registry).
 
 #### Component
 
@@ -100,5 +100,5 @@ A Component Registry holds [Components](#component) (e.g., Helm Charts and Compo
 When an application gets deployed through a [Workload Fleet Manager](#workload-fleet-manager), the components (linked within an [Application Description](../specification/applications/application-description.md)) are requested from the Component Registry and then deployed as [workloads](#workload). Components link to containers that are typically provided through [Container Registries](#container-registry).
 The Component Registry can be implemented, e.g., as an OCI Registry.
 
-#### Container Registry
-A Container Registry hosts container images. [Components](#component) which are provided  as Helm Charts or Compose Archives link to such container images.
+#### Container Image Registry
+A Container Image Registry hosts container images. [Components](#component) which are provided  as Helm Charts or Compose Archives link to such container images.
