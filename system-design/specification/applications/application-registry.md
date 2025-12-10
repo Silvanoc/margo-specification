@@ -1,6 +1,6 @@
 # Application Registry
 
-The interactions of an `Application Registry` are described [here](../../concepts/applications/application-registry.md) from a conceptual view. This section formally specifies the API of the `Application Registry` and the exchange of an [Application Package](../../concepts/applications/application-package.md), defined through an [Application Description](../../specification/applications/application-description.md) file, from an Application Developer to the [Workload Fleet Manager](../../personas-and-definitions/technical-lexicon.md#workload-fleet-manager) (WFM). The `Application Registry` is designed as an `OCI Registry`, i.e., it offers an API compliant with the [OCI Registry API (v1.1.0)](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md) (called here the "OCI_spec") for digital artifact distribution. This way, the Application Registry hosts the parts of an [Application Package](../../concepts/applications/application-package.md) in the form of `blobs` and uses `image manifests` according to [OCI Image specification](https://github.com/opencontainers/image-spec/blob/v1.0.1/manifest.md) to list a set of `layers`, each pointing at a blob.
+The interactions of an `Application Registry` are described [here](../../concepts/applications/application-registry.md) from a conceptual view. This section formally specifies the API of the `Application Registry` and the exchange of an [Application Package](../../concepts/applications/application-package.md), defined through an [Application Description](../../specification/applications/application-description.md) file, from an Application Developer to the [Workload Fleet Manager](../../personas-and-definitions/technical-lexicon.md#workload-fleet-manager) (WFM). The `Application Registry` is designed as an `OCI Registry`, i.e., it offers an API compliant with the [OCI Distribution Scification](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md) (called here the "OCI_spec") for digital artifact distribution. This way, the Application Registry hosts the parts of an [Application Package](../../concepts/applications/application-package.md) in the form of `blobs` and uses `image manifests` according to [OCI Image specification](https://github.com/opencontainers/image-spec/blob/v1.0.1/manifest.md) to list a set of `layers`, each pointing at a blob.
 
 ## Overview of API Endpoints
 
@@ -96,16 +96,13 @@ sequenceDiagram
 
 The interface to retrieve the list of versions of an Application Package MUST be implemented according to OCI_spec endpoint [end-8a](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md#endpoints). 
 
-To get a list of available versions of an Application Package, an HTTP ``GET`` request to a resource path MUST be performed in the following format: `/v2/{name}/tags/list`. The `{name}` variable is the namespace of the Application Package repository, which was communicated by the App Developer to the WFM vendor.
+The list of the available Application Package versions can be obtained as documented in the ["Listing Tags" section of the OCI_spec](https://github.com/opencontainers/distribution-spec/blob/main/spec.md#listing-tags).
 
-The HTTP headers of the ``GET`` request MAY include ```Authorization: Bearer <token>``` for including the interaction with the [Authentication Service](../../concepts/applications/application-registry.md).
+The API supports filtering and pagination as documented in the linked specification section.
 
-To query a subset of tags, the following query parameters MUST be implemented by the Application Registry as defined by OCI_spec endpoint [end-8b](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md#endpoints):
+The `{name}` variable is the namespace of the Application Package repository, which was communicated by the App Developer to the WFM vendor.
 
-* ``n=<integer>`` (optional, limits results to n tags)
-* ``last=<tagname>`` (optional, starts list of tags after ``<tagname>``)
-
-The response of the HTTP ``GET`` request according to [end-8a/end-8b](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md#endpoints) is a list of tags, which comply with the versions of available Application Packages. According to OCI_spec, upon success, the response MUST be a JSON body in the following format:
+The list of Application Packages versions is provided in a JSON document that MUST conform with the above mentioned OCI_spec section and therefore has following format:
 
 ```json
 {
@@ -258,13 +255,8 @@ The following response example is a Margo-specific OCI manifest following the [O
 
 
 
-### Get Parts of Application Package
+### Retrieve Parts of Application Package
 
-The interface to retrieve Application Package parts, i.e., Application Description or Application Resource (e.g., icon, license, etc.), MUST be implemented according to OCI_spec endpoint [end-2](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md#endpoints) by pulling a blob.
+Retrieving the different files that compose an Application Package MUST be implemented according to the ["Pulling blobs" section of the OCI_spec](https://github.com/opencontainers/distribution-spec/blob/main/spec.md#pulling-blobs).
 
-To pull such a blob, an HTTP ``GET`` request to a resource path MUST be performed in the following format: 
-`/v2/{name}/blobs/{digest}`. 
-The `{digest}` is the blob's digest as listed in the application's OCI image manifest that has been [retrieved earlier](#pull-oci-image-manifest-of-application-package).
-The `{name}` variable is the namespace of the Application Package repository.
-
-The HTTP headers of the ``GET`` request MAY include ```Authorization: Bearer <token>``` for including the interaction with the [Authentication Service](../../concepts/applications/application-registry.md).
+Also for this purpose available tools and libraries can be used for an implementation with low complexity.
