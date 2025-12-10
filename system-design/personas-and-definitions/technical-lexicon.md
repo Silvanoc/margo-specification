@@ -97,7 +97,7 @@ An Application Catalog is a visual representation of preselected, install-ready 
 #### Component Registry
 
 A Component Registry holds [Components](#component) (e.g., Helm Charts and Compose Archives) for [Application Packages](#application-package).
-When an application gets deployed through a [Workload Fleet Manager](#workload-fleet-manager), the components (linked within an [Application Description](../specification/applications/application-description.md)) are requested from the Component Registry and then deployed as [workloads](#workload). Components link to containers that are typically provided through [Container Registries](#container-registry).
+When an application gets deployed through a [Workload Fleet Manager](#workload-fleet-manager), the components (linked within an [Application Description](../specification/applications/application-description.md)) are requested from the Component Registry and then deployed as [workloads](#workload). Components link to containers that are typically provided through [Container Registries](#container-image-registry).
 The Component Registry can be implemented, e.g., as an OCI Registry.
 
 #### Container Image Registry

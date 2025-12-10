@@ -1,6 +1,6 @@
 # Application Registry
 
-The interactions of an `Application Registry` are described [here](../../concepts/applications/application-registry.md) from a conceptual view. This section formally specifies the API of the `Application Registry` and the exchange of an [Application Package](../../concepts/applications/application-package.md), defined through an [Application Description](../../specification/applications/application-description.md) file, from an Application Developer to the [Workload Fleet Manager](../../personas-and-definitions/technical-lexicon.md#workload-fleet-manager) (WFM). The `Application Registry` is designed as an `OCI Registry`, i.e., it offers an API compliant with the [OCI Distribution Scification](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md) (called here the "OCI_spec") for digital artifact distribution. This way, the Application Registry hosts the parts of an [Application Package](../../concepts/applications/application-package.md) in the form of `blobs` and uses `image manifests` according to [OCI Image specification](https://github.com/opencontainers/image-spec/blob/v1.0.1/manifest.md) to list a set of `layers`, each pointing at a blob.
+The interactions of an `Application Registry` are described [here](../../concepts/applications/application-registry.md) from a conceptual view. This section formally specifies the API of the `Application Registry` and the exchange of an [Application Package](../../concepts/applications/application-package.md), defined through an [Application Description](../../specification/applications/application-description.md) file, from an Application Developer to the [Workload Fleet Manager](../../personas-and-definitions/technical-lexicon.md#workload-fleet-manager) (WFM). The `Application Registry` is designed as an `OCI Registry`, i.e., it offers an API compliant with the [OCI Distribution Specification](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md) (called here the "OCI_spec") for digital artifact distribution. This way, the Application Registry hosts the parts of an [Application Package](../../concepts/applications/application-package.md) in the form of `blobs` and uses `image manifests` according to [OCI Image specification](https://github.com/opencontainers/image-spec/blob/v1.0.1/manifest.md) to list a set of `layers`, each pointing at a blob.
 
 ## Overview of API Endpoints
 
@@ -35,21 +35,14 @@ Distributing the signatures alongside the Application Packages they validate can
 ## Uploading an Application Package
 
 This section describes the upload workflow.
-
 However this is an application of the [standard artifact push workflow according the OCI Distribution Specification](https://github.com/opencontainers/distribution-spec/blob/main/spec.md#push) and therefore technical details are to be obtained from that specification.
-
 There are multiple libraries (e.g., [regclient](https://pkg.go.dev/github.com/regclient/regclient) or [oras](https://pkg.go.dev/oras.land/oras-go/v2) for Go, [oras](https://pypi.org/project/oras/) for Python) and tools (e.g., [regctl](https://github.com/regclient/regclient), [skopeo](https://github.com/containers/skopeo), [oras](https://github.com/oras-project/oras), [crane](https://github.com/google/go-containerregistry/tree/main/cmd/crane)) to realize this workflow.
 
 As shown in the sequence diagram below, the Application Developer uploads the Margo-compliant `Application Package` to the Application Registry.
-
 I.e., all parts of the Application Package MUST be pushed as blobs according the ["Pushing Blobs" section of the OCI_spec](https://github.com/opencontainers/distribution-spec/blob/main/spec.md#pushing-blobs).
-
 Subsequently, the Application Developer creates an OCI image manifest that lists layers, each of which links to an uploaded blob.
-
 Then the manifest MUST be pushed to the Application Registry according the ["Pushing Manifests" section of the OCI_spec](https://github.com/opencontainers/distribution-spec/blob/main/spec.md#pushing-manifests).
-
-The uploaded OCI image manifest MUST adhere to the Margo-specific constraints detailed [here](#oci-image-manifest-as-response-from-application-registry).
-
+The uploaded OCI image manifest MUST adhere to the Margo-specific constraints detailed [here](#application-package-oci-manifest).
 Subsequently, the App Developer uses a UI or other vendor-specific mechanism to communicate (either directly or indirectly) to the WFM the namespace of the Application Package's repository. 
 
 ```mermaid
@@ -66,18 +59,13 @@ sequenceDiagram
 ## Retrieving an Application Package
 
 This section describes the retrieval workflow.
-
 However this is an application of the [standard artifact pull workflow according the OCI Distribution Specification](https://github.com/opencontainers/distribution-spec/blob/main/spec.md#pull) and therefore technical details are to be obtained from that specification.
 
 The WFM has received the namespace of the repository of the Application Package at the Application Registry.
-
 Next, as shown in the sequence diagram below, the WFM uses the API endpoints defined in the OCI_spec to retrieve a list of Application Package versions (as detailed [here](#list-margo-application-package-versions)).
-
-Then, the WFM pulls the OCI image manifest of the selected version of the Application Package, with the identifying reference being a tag or digest (as detailed [here](#pull-oci-image-manifest-of-application-package)).
-
+Then, the WFM pulls the OCI image manifest of the selected version of the Application Package, with the identifying reference being a tag or digest (as detailed [here](#retrieving-oci-image-manifest-of-application-package-manifest)).
 If high trust requirements apply on the acquisition of the application package versions, state-of-the-art mechanisms can be applied to ensure that sophisticated attacks are not possible (for example a [TUF](https://theupdateframework.com/) implementation).
-
-Finally, all parts (e.g., the Application Description file, the icon, the license, etc.) of the Application Package are retrieved by pulling the respective blobs listed as layers in the image manifest (as detailed [here](#get-parts-of-application-package)). 
+Finally, all parts (e.g., the Application Description file, the icon, the license, etc.) of the Application Package are retrieved by pulling the respective blobs listed as layers in the image manifest (as detailed [here](#retrieve-parts-of-application-package)). 
 
 ```mermaid
 sequenceDiagram
@@ -94,12 +82,8 @@ sequenceDiagram
 
 ### List Margo Application Package Versions
 
-The interface to retrieve the list of versions of an Application Package MUST be implemented according to OCI_spec endpoint [end-8a](https://github.com/opencontainers/distribution-spec/blob/v1.1.0/spec.md#endpoints). 
-
 The list of the available Application Package versions can be obtained as documented in the ["Listing Tags" section of the OCI_spec](https://github.com/opencontainers/distribution-spec/blob/main/spec.md#listing-tags).
-
 The API supports filtering and pagination as documented in the linked specification section.
-
 The `{name}` variable is the namespace of the Application Package repository, which was communicated by the App Developer to the WFM vendor.
 
 The list of Application Packages versions is provided in a JSON document that MUST conform with the above mentioned OCI_spec section and therefore has following format:
@@ -115,7 +99,7 @@ The list of Application Packages versions is provided in a JSON document that MU
 }
 ```
 
-Thereby, a listed tag of an image manifest MUST be the same as the value of the key ``metadata.version`` as specified in the Application Description document of the associated Application Package.
+Thereby, a listed tag of an image manifest MUST be the same as the value of the key ``metadata.version`` as specified in the [Application Description document](../../specification/applications/application-description.md) of the associated Application Package.
 
 #### Example A (no filtering):
 
@@ -148,23 +132,21 @@ Response:
 }
 ```
 
-### Retrieving OCI Image Manifest of Application Package Manifest
+### Retrieving Application Package Manifest
 
-The Application Package OCI Manifest is a JSON document that conforms the [OCI Manifest specification](https://github.com/opencontainers/image-spec/blob/main/manifest.md) and provides metadata required for the distribution of the Application Package (from pushing to pulling) according the OCI specification.
-
-Therefore retrieving an Application Package OCI Manifest MUST be implemented according the ["Pulling manifests" section of the OCISpec](https://github.com/opencontainers/distribution-spec/blob/main/spec.md#pulling-manifests).
+The Application Package Manifest is a JSON document that conforms to the [OCI Manifest specification](https://github.com/opencontainers/image-spec/blob/main/manifest.md) and provides metadata required for the distribution of the Application Package (from pushing to pulling) according to the OCI_spec.
+Therefore retrieving an Application Package Manifest MUST be implemented according the ["Pulling manifests" section of the OCISpec](https://github.com/opencontainers/distribution-spec/blob/main/spec.md#pulling-manifests).
 
 As mentioned before, different libraries and tools do the heavylifting of implementing these workflow.
-
 An implementation without any of those tools or libraries is possible and MUST rely on the OCI_spec to do so.
 
-#### Application Package OCI Manifest
+#### Application Package Manifest
 
-An Application Package OCI Manifest conforms to the [OCI Image Manifest Specification](https://github.com/opencontainers/image-spec/blob/v1.1.0/manifest.md) MUST contain pointers to all parts of an Application Package within the Application Registry.
-This section specifies the Margo requirements on these kind of manifests.
+The Application Package Manifest is an OCI image manifest that MUST conform to the [OCI Image Manifest Specification](https://github.com/opencontainers/image-spec/blob/v1.1.0/manifest.md) and MUST contain pointers to all parts of an Application Package within the Application Registry.
+This section specifies the Margo requirements on the Application Package Manifest.
 Please refer to the [OCI Image Manifest Specification](https://github.com/opencontainers/image-spec/blob/v1.1.0/manifest.md) for all other technical details that are not Margo specific.
 
-Each version of an Application Package MUST have its own OCI manifest.
+Each version of an Application Package MUST have its own OCI image manifest.
 
 The ``artifactType`` of the OCI image manifest must be ``application/vnd.margo.app.v1+json``.
 
@@ -173,11 +155,13 @@ The ``config`` MUST be a so-called "empty config" and be specified in the manife
 Each element of the ``layers`` array contains a reference (so-called `digests`) to an artifact (so-called `blobs`) that is a part of the Application Package.
 
 Each Application Package part (file) MUST be listed as an element of the ``layers`` array:
+
 * The [Application Description](../../specification/applications/application-description.md) of the Application Package must be referred to in one element of the ``layers`` array, where the ``mediaType`` of this blob must be ``application/vnd.margo.app.description.v1+yaml``.
+
 * Each [application resource](../../concepts/applications/application-package.md), which is an additional file associated with the application, must be referred to as a blob listed in the ``layers`` array.
   The blobs of resource files must be marked with a **mediaType** specific to the kind of resource file (currently four possible resource files: ``icon``, ``releaseNotes``, ``descriptionFile``, ``licenseFile``), as listed in the [table below](../../specification/applications/application-registry.md#margo-specific-media-types)). E.g., the blob representing the icon file (e.g., in ``jpeg`` format) of an application is marked with the mediaType `application/vnd.margo.app.icon.v1+jpeg`. The [Application Description file](../../specification/applications/application-description.md) lists these resource files in the ```metadata.catalog.application`` element.
 
-The following response example is a Margo-specific OCI manifest following the [OCI Image Manifest Specification](https://github.com/opencontainers/image-spec/blob/v1.0.1/manifest.md) and the above defined specifics:
+The following response example is a Margo-specific OCI image manifest following the [OCI Image Manifest Specification](https://github.com/opencontainers/image-spec/blob/v1.0.1/manifest.md) and the above defined specifics:
 
 ```json
 {
