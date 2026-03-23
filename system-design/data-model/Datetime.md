@@ -1,0 +1,53 @@
+# Type: datetime 
+
+
+
+
+_The combination of a date and time_
+
+
+
+URI: [https://specification.margo.org/data-model/datetime](https://specification.margo.org/data-model/datetime)
+
+## Type Properties
+
+| Property | Value |
+| --- | --- |
+| Base | `XSDDateTime` |
+| Type URI | [xsd:dateTime](http://www.w3.org/2001/XMLSchema#dateTime) |
+| Representation | `str` |
+
+
+
+
+
+
+## Notes
+
+* If you are authoring schemas in LinkML YAML, the type is referenced with the lower case "datetime".
+
+
+
+## Identifier and Mapping Information
+
+
+
+
+
+### Schema Source
+
+
+* from schema: https://specification.margo.org/data-model
+
+
+
+
+## Mappings
+
+| Mapping Type | Mapped Value |
+| ---  | ---  |
+| self | https://specification.margo.org/data-model/datetime |
+| native | https://specification.margo.org/data-model/datetime |
+| exact | schema:DateTime |
+
+

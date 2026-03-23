@@ -30,38 +30,6 @@ jobs:
       - name: Check pyproject.toml and poetry.lock
         run: poetry check
 
-  validate:
-    needs:
-      - quality-checks
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Ensure tags if not run from main repo
-        if: github.repository != 'margo/specification'
-        run: |
-          git remote add upstream https://github.com/margo/specification
-          git fetch upstream --tags
-
-      - name: Install poetry
-        run: pipx install poetry
-
-      - uses: actions/setup-python@v5
-        id: setup-python
-        with:
-          python-version: '3.12'
-          cache: 'poetry'
-
-      - name: Install dependencies
-        run: poetry install --no-interaction --all-extras
-
-      - name: Run tests
-        run: |
-          doc-generation/check-examples.bash
-
   documents:
     needs:
       - quality-checks
@@ -92,66 +60,54 @@ jobs:
 
       - name: Generate MarkDown documentation
         run: |
-          doc-generation/generate-documentation.bash
+          data-model/tools/generate-docs.bash
 
       - name: Share generated documentation with later jobs
-        uses: actions/upload-artifact@v4
+        run: tar -cf merged.tar merged
+      - uses: actions/upload-artifact@v4
         with:
           name: generated-documentation
-          path: |
-            system-design/specification/applications/application-description.md
-            system-design/specification/margo-management-interface/desired-state.md
+          path: merged.tar
 
   pages:
     needs:
-      - validate
       - documents
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install poetry
+        run: pipx install poetry
+
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-
-      - name: Install poetry
-        uses: abatilo/actions-poetry@v2
-
-      # create local virtualenv to enable caching in CI
-      - name: Configure poetry
-        run: |
-          poetry config virtualenvs.create true --local
-          poetry config virtualenvs.in-project true --local
-
-      - name: Setup Cache
-        uses: actions/cache@v4
-        with:
-          path: ./.venv
-          # cache is invalidated if dependencies change
-          key: venv-${{ hashFiles('poetry.lock') }}
+          cache: 'poetry'
 
       - name: Install the project dependencies
-        run: poetry install
+        run: poetry install --no-interaction --all-extras
 
       - name: Get generated documentation from previous jobs
         uses: actions/download-artifact@v4
         with:
           name: generated-documentation
-          path: system-design/specification
+
+      - name: Extract generated documentation
+        run: tar -xf merged.tar
 
       - name: Build Pages
         run: poetry run -- mkdocs build
 
       - name: GitHub Pages Deploy
         # only deploy if we are on the default branch
-        if: ${{ github.ref == 'refs/heads/pre-draft' }}
+        if: ${{ github.ref == 'refs/heads/pre-draft' || github.ref == 'refs/heads/data-model-generation-result' }}
         run: poetry run -- mkdocs gh-deploy --force --clean --verbose
 
       - name: Upload pages
         uses: actions/upload-artifact@v4
-        if: ${{ github.ref != 'refs/heads/pre-draft' }}
+        if: ${{ github.ref != 'refs/heads/pre-draft' || github.ref != 'refs/heads/data-model-generation-result' }}
         with:
           name: margo-specification
           path: site

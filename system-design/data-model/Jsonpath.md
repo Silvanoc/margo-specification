@@ -1,0 +1,52 @@
+# Type: jsonpath 
+
+
+
+
+_A string encoding a JSON Path. The value of the string MUST conform to JSON Point syntax and SHOULD dereference to zero or more valid objects within the current instance document when encoded in tree form._
+
+
+
+URI: [https://specification.margo.org/data-model/jsonpath](https://specification.margo.org/data-model/jsonpath)
+
+## Type Properties
+
+| Property | Value |
+| --- | --- |
+| Base | `str` |
+| Type URI | [xsd:string](http://www.w3.org/2001/XMLSchema#string) |
+| Representation | `str` |
+
+
+
+
+
+
+## Notes
+
+* If you are authoring schemas in LinkML YAML, the type is referenced with the lower case "jsonpath".
+
+
+
+## Identifier and Mapping Information
+
+
+
+
+
+### Schema Source
+
+
+* from schema: https://specification.margo.org/data-model
+
+
+
+
+## Mappings
+
+| Mapping Type | Mapped Value |
+| ---  | ---  |
+| self | https://specification.margo.org/data-model/jsonpath |
+| native | https://specification.margo.org/data-model/jsonpath |
+
+
