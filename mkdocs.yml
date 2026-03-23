@@ -43,7 +43,13 @@ nav:
         - specification/observability/publishing-workload-observability-data.md
         - specification/observability/collecting-workload-observability-data.md
         - specification/observability/consuming-workload-observability-data.md
-
+  - Data Model:
+      - data-model/index.md
+      - ApplicationDescription: data-model/ApplicationDescription.md
+      - ApplicationDeployment: data-model/ApplicationDeployment.md
+      - DeviceCapabilitiesManifest: data-model/DeviceCapabilitiesManifest.md
+      - DesiredStateManifest: data-model/DesiredStateManifest.md
+      - DeploymentStatusManifest: data-model/DeploymentStatusManifest.md
   - Make a Contribution:
       - make-a-contribution/contributing.md
 
@@ -74,6 +80,8 @@ theme:
 markdown_extensions:
   - toc:
       toc_depth: 2
+  - admonition
+  - pymdownx.details
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
