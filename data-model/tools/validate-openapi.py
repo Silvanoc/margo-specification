@@ -12,6 +12,21 @@ from pathlib import Path
 import yaml
 
 
+# ── Color support ──────────────────────────────────────────────
+_USE_COLOR = sys.stdout.isatty()
+
+def _c(code: str, text: str) -> str:
+    return f"\033[{code}m{text}\033[0m" if _USE_COLOR else text
+
+def bold(text: str) -> str:    return _c("1", text)
+def green(text: str) -> str:   return _c("32", text)
+def red(text: str) -> str:     return _c("31", text)
+def yellow(text: str) -> str:  return _c("33", text)
+def cyan(text: str) -> str:    return _c("36", text)
+def dim(text: str) -> str:     return _c("2", text)
+# ───────────────────────────────────────────────────────────────
+
+
 ROOT = Path(__file__).resolve().parent.parent.parent
 PRE_DRAFT_FILE = "system-design/specification/margo-management-interface/workload-management-api-1.0.0.yaml"
 GENERATED_FILE = "generated/openapi/workload-management-api-1.0.0.openapi.yaml"
@@ -89,11 +104,11 @@ def compare_section(label: str, ref: dict, gen: dict, path: str, errors: list) -
     """Compare a top-level section."""
     section_errors = deep_diff(label, ref.get(path, {}), gen.get(path, {}), path)
     if section_errors:
-        print(f"\n  {label} ({len(section_errors)} diff(s)):")
+        print(f"\n  {label} ({red(str(len(section_errors)))} diff(s)):")
         for e in section_errors:
-            print(f"    - {e}")
+            print(f"    - {dim(e)}")
     else:
-        print(f"  {label}: ✓ IDENTICAL")
+        print(f"  {label}: {green('✓ IDENTICAL')}")
 
 
 MARKER_LINE = "  # Schemas removed because they are neither direct nor transitive requirements:"
@@ -311,15 +326,15 @@ def find_inlined_candidates(
 
 
 def main():
-    print("=" * 60)
-    print("OpenAPI Spec Validation: pre-draft vs generated")
-    print("=" * 60)
+    print(cyan("=" * 60))
+    print(cyan("OpenAPI Spec Validation: pre-draft vs generated"))
+    print(cyan("=" * 60))
 
     ref = get_pre_draft_spec()
     gen = get_generated_spec()
 
     # 1. Info
-    print("\n--- Top-level ---")
+    print(f"\n{cyan('--- Top-level ---')}")
     for key in ["openapi", "info"]:
         compare_section(key, ref, gen, key, [])
 
@@ -330,7 +345,7 @@ def main():
     compare_section("security", ref, gen, "security", [])
 
     # 4. Paths
-    print(f"\n--- Paths ---")
+    print(f"\n{cyan('--- Paths ---')}")
     ref_paths = ref.get("paths", {})
     gen_paths = gen.get("paths", {})
     ref_pkeys = set(ref_paths.keys())
@@ -340,9 +355,9 @@ def main():
     common_p = ref_pkeys & gen_pkeys
 
     if only_ref_p:
-        print(f"  MISSING IN GENERATED ({len(only_ref_p)}): {sorted(only_ref_p)}")
+        print(f"  {red('MISSING IN GENERATED')} ({len(only_ref_p)}): {sorted(only_ref_p)}")
     if only_gen_p:
-        print(f"  EXTRA IN GENERATED ({len(only_gen_p)}): {sorted(only_gen_p)}")
+        print(f"  {yellow('EXTRA IN GENERATED')} ({len(only_gen_p)}): {sorted(only_gen_p)}")
 
     for path in sorted(common_p):
         ref_methods = ref_paths[path]
@@ -353,21 +368,21 @@ def main():
         only_gen_m = gen_mkeys - ref_mkeys
 
         if only_ref_m or only_gen_m:
-            print(f"  {path}: METHOD DIFF — ref={sorted(ref_mkeys)} gen={sorted(gen_mkeys)}")
+            print(f"  {yellow(path)}: METHOD DIFF — ref={sorted(ref_mkeys)} gen={sorted(gen_mkeys)}")
         else:
             all_method_ok = True
             for method in sorted(ref_mkeys):
                 errs = deep_diff(path, ref_methods[method], gen_methods[method], f"{path}.{method}")
                 if errs:
                     all_method_ok = False
-                    print(f"  {path}.{method}: {len(errs)} diff(s)")
-                    for e in errs[:3]:
-                        print(f"    - {e}")
+                    print(f"  {path}.{method}: {red(str(len(errs)))} diff(s)")
+                    for e in errs:
+                        print(f"    - {dim(e)}")
             if all_method_ok:
-                print(f"  {path}: ✓ IDENTICAL")
+                print(f"  {path}: {green('✓ IDENTICAL')}")
 
     # 5. Components (excluding schemas — handled separately)
-    print(f"\n--- Components (non-schemas) ---")
+    print(f"\n{cyan('--- Components (non-schemas) ---')}")
     ref_comp = ref.get("components", {})
     gen_comp = gen.get("components", {})
     comp_keys = set(ref_comp.keys()) | set(gen_comp.keys())
@@ -377,7 +392,7 @@ def main():
         compare_section(f"components.{ck}", ref_comp, gen_comp, ck, [])
 
     # 6. Schemas (detailed)
-    print(f"\n--- components/schemas ---")
+    print(f"\n{cyan('--- components/schemas ---')}")
     ref_schemas = ref_comp.get("schemas", {})
     gen_schemas = gen_comp.get("schemas", {})
     not_needed = get_not_needed_schemas()
@@ -408,10 +423,10 @@ def main():
             explained_extra.add(gen_name)
     unexplained_extra = only_gen - explained_extra
 
-    print(f"\n  Schemas ({len(ref_keys)} ref, {len(gen_keys)} gen, {len(not_needed)} NOT-NEEDED, {len(inlined)} INLINED):")
+    print(f"\n  Schemas ({bold(str(len(ref_keys)))} ref, {bold(str(len(gen_keys)))} gen, {bold(str(len(not_needed)))} NOT-NEEDED, {bold(str(len(inlined)))} INLINED):")
 
     if xlinkml_renames:
-        print(f"    x-linkml-source RENAMES ({len(xlinkml_renames)}):")
+        print(f"    {dim('x-linkml-source RENAMES')} ({len(xlinkml_renames)}):")
         for openapi_name, linkml_name in sorted(xlinkml_renames.items()):
             print(f"      {openapi_name} ← {linkml_name}")
 
@@ -419,55 +434,53 @@ def main():
         not_needed_only = intentionally_omitted & not_needed
         inlined_only = intentionally_omitted & inlined
         if not_needed_only:
-            print(f"    NOT-NEEDED ({len(not_needed_only)}): {sorted(not_needed_only)}")
+            print(f"    {dim('NOT-NEEDED')} ({len(not_needed_only)}): {sorted(not_needed_only)}")
         if inlined_only:
-            print(f"    INLINED SUBSCHEMAS ({len(inlined_only)}): {sorted(inlined_only)}")
+            print(f"    {dim('INLINED SUBSCHEMAS')} ({len(inlined_only)}): {sorted(inlined_only)}")
 
     if truly_missing:
-        print(f"    MISSING IN GENERATED ({len(truly_missing)}): {sorted(truly_missing)}")
+        print(f"    {red('MISSING IN GENERATED')} ({len(truly_missing)}): {sorted(truly_missing)}")
 
     if high_scoring_inlined:
-        print(f"    INFERRED INLINED ({len(high_scoring_inlined)}):")
+        print(f"    {yellow('INFERRED INLINED')} ({len(high_scoring_inlined)}):")
         for gen_name, prop_path, score in sorted(high_scoring_inlined, key=lambda x: -x[2]):
             print(f"      {gen_name} inlined into {prop_path} (score {score})")
 
     if unexplained_extra:
-        print(f"    EXTRA IN GENERATED ({len(unexplained_extra)}): {sorted(unexplained_extra)}")
+        print(f"    {yellow('EXTRA IN GENERATED')} ({len(unexplained_extra)}): {sorted(unexplained_extra)}")
 
     if rename_candidates:
-        print(f"    RENAME CANDIDATES (missing → extra, by structural similarity):")
+        print(f"    {dim('RENAME CANDIDATES')} (missing → extra, by structural similarity):")
         shown = 0
         for ref_name, gen_name, score in rename_candidates:
             if ref_name in truly_missing and gen_name in unexplained_extra:
                 print(f"      {ref_name} ↔ {gen_name} (score {score})")
                 shown += 1
                 if shown >= 5:
+                    print(f"      ... ({len(rename_candidates) - 5} more)")
                     break
 
     if common:
-        changed = 0
+        changed_names: list[str] = []
         for name in sorted(common):
             ref_s = ref_schemas[name]
             gen_s = gen_schemas[name]
             s_errors = deep_diff("", ref_s, gen_s, name)
             if s_errors:
-                changed += 1
-                if changed <= 3:
-                    print(f"    {name}: CHANGED ({len(s_errors)} diff(s))")
-                    for e in s_errors[:5]:
-                        print(f"      - {e}")
-        unchanged = len(common) - changed
-        print(f"    Common schemas: {unchanged} identical, {changed} changed")
-        if changed > 3:
-            print(f"    (only first 3 changed shown; {changed} total)")
+                changed_names.append(name)
+                print(f"    {name}: {red(str(len(s_errors)))} diff(s)")
+                for e in s_errors:
+                    print(f"      - {dim(e)}")
+        unchanged = len(common) - len(changed_names)
+        print(f"    {dim('Common schemas:')} {green(str(unchanged))} identical, {yellow(str(len(changed_names)))} changed")
 
-    print("\n" + "=" * 60)
+    print(f"\n{cyan('=' * 60)}")
     total_errors = len(deep_diff("", ref, gen, ""))
     if total_errors == 0:
-        print("RESULT: FULLY IDENTICAL ✓")
+        print(f"{green('RESULT: FULLY IDENTICAL ✓')}")
     else:
-        print(f"RESULT: {total_errors} difference(s) found")
-    print("=" * 60)
+        print(f"{red(f'RESULT: {total_errors} difference(s) found')}")
+    print(cyan("=" * 60))
 
 
 if __name__ == "__main__":
