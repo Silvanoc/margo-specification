@@ -370,6 +370,7 @@ class OpenApiGenerator(Generator):
                 continue
             json_schema = JsonSchemaGenerator(
                 self.schemaview.schema,
+                not_closed=True,
                 include_null=False,
                 top_class=linkml_element_name,
             ).generate()
@@ -403,6 +404,7 @@ class OpenApiGenerator(Generator):
                     continue
                 json_schema = JsonSchemaGenerator(
                     self.schemaview.schema,
+                    not_closed=True,
                     include_null=False,
                     top_class=linkml_element_name,
                 ).generate()
