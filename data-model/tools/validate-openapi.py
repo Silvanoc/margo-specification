@@ -416,7 +416,7 @@ def _find_referers(
     return sorted(set(path_refs)), sorted(set(schema_refs))
 
 
-def _show_schema_detail(raw_name: str) -> None:
+def _show_schema_detail(raw_name: str, show_yaml: bool = False) -> None:
     """Show detailed information about a single schema."""
     ref = get_pre_draft_spec()
     gen = get_generated_spec()
@@ -534,6 +534,18 @@ def _show_schema_detail(raw_name: str) -> None:
                 if only_gen_p:
                     print(f"  {yellow('Properties only in generated:')} {sorted(only_gen_p)}")
 
+        # YAML dump
+        if show_yaml:
+            print(f"\n{dim('─' * 40)}")
+            pre_s = ref_schemas.get(schema_name, ref_schemas.get(raw_name)) if schema_name in common else None
+            gen_s = gen_schemas.get(schema_name)
+            if pre_s:
+                print(f"\n{bold('Pre-draft')} ({schema_name}):")
+                print(yaml.dump(pre_s, default_flow_style=False, sort_keys=False, allow_unicode=True).rstrip())
+            if gen_s:
+                print(f"\n{bold('Generated')} ({schema_name}):")
+                print(yaml.dump(gen_s, default_flow_style=False, sort_keys=False, allow_unicode=True).rstrip())
+
     else:
         if schema_name in only_ref:
             print(f"\n  {bold(schema_name)}")
@@ -557,11 +569,16 @@ def main():
         "--schema", "-s",
         help="Show verbose details for a single schema only (name in generated output)",
     )
+    parser.add_argument(
+        "--yaml", "-y",
+        action="store_true",
+        help="Show YAML of both pre-draft and generated schemas (use with -s)",
+    )
     args = parser.parse_args()
 
     # Single-schema mode: skip everything and show only the schema detail
     if args.schema:
-        _show_schema_detail(args.schema)
+        _show_schema_detail(args.schema, args.yaml)
         return
 
     print(cyan("=" * 60))
