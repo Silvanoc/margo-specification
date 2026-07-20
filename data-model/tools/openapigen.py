@@ -255,7 +255,9 @@ class OpenApiGenerator(Generator):
         enum_schemas = {
             name: schema
             for name, schema in data_schemas.items()
-            if isinstance(schema, dict) and "enum" in schema and "properties" not in schema
+            if isinstance(schema, dict)
+            and "enum" in schema
+            and "properties" not in schema
         }
         if not enum_schemas:
             return data_schemas
@@ -271,7 +273,11 @@ class OpenApiGenerator(Generator):
                 return [_replace_refs(item) for item in obj]
             return obj
 
-        return {k: _replace_refs(v) for k, v in data_schemas.items() if k not in enum_schemas}
+        return {
+            k: _replace_refs(v)
+            for k, v in data_schemas.items()
+            if k not in enum_schemas
+        }
 
     def _find_schemas_line(self, template_text: str) -> int:
         """Return the 0-indexed line number of the ``schemas`` key under ``components``."""
@@ -519,7 +525,10 @@ def cli(yamlfile, template, keep_unreferenced, inline_enums, **args):
         return
     print(
         OpenApiGenerator(
-            yamlfile, keep_unreferenced=keep_unreferenced, inline_enums=inline_enums, **args
+            yamlfile,
+            keep_unreferenced=keep_unreferenced,
+            inline_enums=inline_enums,
+            **args,
         ).serialize(template_file=template, **args),
         end="",
     )
