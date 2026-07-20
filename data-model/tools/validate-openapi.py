@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Compare the pre-draft OpenAPI spec with the generated one at object level."""
 
+import argparse
 import json
 import os
 import re
@@ -98,6 +99,31 @@ def deep_diff(label: str, ref, gen, path: str = "", errors: list | None = None) 
             errors.append(f"{path}: VALUE MISMATCH — {ref!r} vs {gen!r}")
 
     return errors
+
+
+def _is_desc_only(err: str) -> bool:
+    """True if the error is a description-only string mismatch."""
+    return re.match(r".*\.description: STRING MISMATCH", err) is not None
+
+
+def _is_aprop(err: str) -> bool:
+    """True if the error is about additionalProperties."""
+    return "additionalPropert" in err
+
+
+def _categorize_errors(errors: list[str]) -> dict[str, list[str]]:
+    """Split errors into description-only, additionalProperties, and structural."""
+    desc: list[str] = []
+    aprop: list[str] = []
+    struct: list[str] = []
+    for e in errors:
+        if _is_desc_only(e):
+            desc.append(e)
+        elif _is_aprop(e):
+            aprop.append(e)
+        else:
+            struct.append(e)
+    return {"desc": desc, "aprop": aprop, "struct": struct}
 
 
 def compare_section(label: str, ref: dict, gen: dict, path: str, errors: list) -> None:
@@ -325,7 +351,219 @@ def find_inlined_candidates(
     return candidates
 
 
+def _resolve_schema_name(
+    raw: str, gen_schemas: dict, xlinkml_renames: dict
+) -> str | None:
+    """Resolve an OpenAPI or LinkML name to the generated schema name."""
+    if raw in gen_schemas:
+        return raw
+    # Check if it's a LinkML name → find the OpenAPI name via renames
+    for openapi_name, linkml_name in xlinkml_renames.items():
+        if linkml_name == raw or linkml_name.split(".")[0] == raw:
+            return openapi_name
+    # Check dotted path: Class.slot → synthetic key
+    for openapi_name, linkml_name in xlinkml_renames.items():
+        if linkml_name == raw:
+            return openapi_name
+    return None
+
+
+def _collect_refs(obj, results: set[str], prefix: str = "#/components/schemas/"):
+    """Recursively collect all $ref target names from a schema definition."""
+    if isinstance(obj, dict):
+        if "$ref" in obj and isinstance(obj["$ref"], str) and obj["$ref"].startswith(prefix):
+            results.add(obj["$ref"].replace(prefix, ""))
+        for v in obj.values():
+            _collect_refs(v, results, prefix)
+    elif isinstance(obj, list):
+        for item in obj:
+            _collect_refs(item, results, prefix)
+
+
+def _find_referers(
+    schema_name: str, gen_schemas: dict, gen_paths: dict
+) -> tuple[list[str], list[str]]:
+    """Find all paths and schemas that reference the given schema."""
+    path_refs: list[str] = []
+    schema_refs: list[str] = []
+    target = f"#/components/schemas/{schema_name}"
+
+    # Check paths
+    for path, methods in gen_paths.items():
+        for method, spec in methods.items():
+            def _check(obj):
+                if isinstance(obj, dict):
+                    if "$ref" in obj and obj["$ref"] == target:
+                        path_refs.append(f"{method.upper()} {path}")
+                        return
+                    for v in obj.values():
+                        _check(v)
+                elif isinstance(obj, list):
+                    for item in obj:
+                        _check(item)
+            _check(spec)
+
+    # Check schemas
+    for name, schema in gen_schemas.items():
+        if name == schema_name:
+            continue
+        found: set[str] = set()
+        _collect_refs(schema, found)
+        if schema_name in found:
+            schema_refs.append(name)
+
+    # Deduplicate and sort
+    return sorted(set(path_refs)), sorted(set(schema_refs))
+
+
+def _show_schema_detail(raw_name: str) -> None:
+    """Show detailed information about a single schema."""
+    ref = get_pre_draft_spec()
+    gen = get_generated_spec()
+    xlinkml_renames = get_xlinkml_renames()
+    gen_schemas = gen.get("components", {}).get("schemas", {})
+    ref_schemas = ref.get("components", {}).get("schemas", {})
+    gen_paths = gen.get("paths", {})
+    ref_comp = ref.get("components", {})
+    gen_comp = gen.get("components", {})
+
+    ref_keys = set(ref_schemas.keys())
+    gen_keys = set(gen_schemas.keys())
+    only_ref = ref_keys - gen_keys
+    only_gen = gen_keys - ref_keys
+    common = ref_keys & gen_keys
+
+    schema_name = _resolve_schema_name(raw_name, gen_schemas, xlinkml_renames)
+    if schema_name is None:
+        print(f"{red('Schema not found:')} {raw_name}")
+        print(f"  {dim('Try an OpenAPI schema name or a LinkML class/type name.')}")
+        print(f"  {dim('OpenAPI names:')} {', '.join(sorted(gen_schemas.keys()))}")
+        return
+
+    linkml_src = None
+    for on, ln in xlinkml_renames.items():
+        if on == schema_name:
+            linkml_src = ln
+            break
+
+    print(f"\n{bold(schema_name)}")
+    if linkml_src:
+        print(f"  LinkML source: {dim(linkml_src)}")
+
+    if schema_name in gen_schemas:
+        gen_s = gen_schemas[schema_name]
+        refs_from: set[str] = set()
+        _collect_refs(gen_s, refs_from)
+        path_refs, schema_refs = _find_referers(schema_name, gen_schemas, gen_paths)
+
+        # Status
+        if schema_name in common:
+            s_errors = deep_diff("", ref_schemas[schema_name], gen_s, schema_name)
+            cats = _categorize_errors(s_errors)
+            status = f"{red(str(len(s_errors)))} diff(s)" if s_errors else green("identical")
+            print(f"  Status: {status}")
+            if cats["desc"]:
+                print(f"    {dim('Description-only')} ({len(cats['desc'])}):")
+                for e in cats["desc"]:
+                    print(f"      - {dim(e)}")
+            if cats["aprop"]:
+                print(f"    {yellow('additionalProperties')} ({len(cats['aprop'])}):")
+                for e in cats["aprop"]:
+                    print(f"      - {yellow(e)}")
+            if cats["struct"]:
+                print(f"    {red('Structural')} ({len(cats['struct'])}):")
+                for e in cats["struct"]:
+                    print(f"      - {red(e)}")
+        elif schema_name in only_gen:
+            print(f"  Status: {yellow('EXTRA — not in pre-draft')}")
+        elif schema_name in only_ref:
+            print(f"  Status: {red('MISSING — not in generated output')}")
+        else:
+            print(f"  Status: {green('not in comparison')}")
+
+        # Referers (paths)
+        if path_refs:
+            print(f"  {dim('Referenced by endpoints')} ({len(path_refs)}):")
+            for pr in path_refs:
+                print(f"    {green(pr)}")
+        else:
+            print(f"  {dim('Referenced by endpoints:')} {dim('none')}")
+
+        # Referers (schemas)
+        if schema_refs:
+            print(f"  {dim('Referenced by schemas')} ({len(schema_refs)}):")
+            for sr in schema_refs:
+                print(f"    {sr}")
+        else:
+            print(f"  {dim('Referenced by schemas:')} {dim('none')}")
+
+        # References from this schema
+        if refs_from:
+            print(f"  {dim('References to other schemas')} ({len(refs_from)}):")
+            for rf in sorted(refs_from):
+                print(f"    {rf}")
+        else:
+            print(f"  {dim('References to other schemas:')} {dim('none')}")
+
+        # Inline / extra context
+        if schema_name in only_gen:
+            candidates = find_inlined_candidates(ref_schemas, {schema_name: gen_s}, {schema_name})
+            if candidates:
+                best = max(candidates, key=lambda x: x[2])
+                print(f"  {yellow('Inferred inlined')} in pre-draft at {best[1]} (score {best[2]})")
+        elif schema_name in common:
+            pre_s = ref_schemas.get(schema_name, {})
+            props = pre_s.get("properties", {})
+            if isinstance(props, dict):
+                inlined_props = [k for k, v in props.items() if isinstance(v, dict) and "$ref" not in v and "properties" in v]
+                if inlined_props:
+                    print(f"  {dim('Pre-draft inlined properties:')} {', '.join(inlined_props)}")
+
+        # Property-level comparison
+        if schema_name in common:
+            pre_s = ref_schemas[schema_name]
+            gen_props = gen_s.get("properties", {})
+            pre_props = pre_s.get("properties", {})
+            if isinstance(gen_props, dict) and isinstance(pre_props, dict):
+                gen_keys_set = set(gen_props.keys())
+                pre_keys_set = set(pre_props.keys())
+                only_pre = pre_keys_set - gen_keys_set
+                only_gen_p = gen_keys_set - pre_keys_set
+                if only_pre:
+                    print(f"  {red('Properties only in pre-draft:')} {sorted(only_pre)}")
+                if only_gen_p:
+                    print(f"  {yellow('Properties only in generated:')} {sorted(only_gen_p)}")
+
+    else:
+        if schema_name in only_ref:
+            print(f"\n  {bold(schema_name)}")
+            print(f"  Status: {red('MISSING — in pre-draft but not generated')}")
+            pre_s = ref_schemas.get(schema_name, {})
+            if pre_s:
+                print(f"  {dim('Pre-draft definition:')}")
+                print(f"    type: {pre_s.get('type', 'N/A')}")
+                props = pre_s.get("properties", {})
+                if isinstance(props, dict):
+                    for pk, pv in props.items():
+                        ref_type = pv.get("type", "object") if isinstance(pv, dict) else "N/A"
+                        print(f"    {pk}: {ref_type}")
+
+
 def main():
+    parser = argparse.ArgumentParser(
+        description="Compare pre-draft vs generated OpenAPI spec"
+    )
+    parser.add_argument(
+        "--schema", "-s",
+        help="Show verbose details for a single schema only (name in generated output)",
+    )
+    args = parser.parse_args()
+
+    # Single-schema mode: skip everything and show only the schema detail
+    if args.schema:
+        _show_schema_detail(args.schema)
+        return
+
     print(cyan("=" * 60))
     print(cyan("OpenAPI Spec Validation: pre-draft vs generated"))
     print(cyan("=" * 60))
@@ -460,19 +698,38 @@ def main():
                     print(f"      ... ({len(rename_candidates) - 5} more)")
                     break
 
-    if common:
+    elif common:
+        # ── Full summary with categorization ────────────────────
+        all_aprop_schemas: set[str] = set()
         changed_names: list[str] = []
         for name in sorted(common):
             ref_s = ref_schemas[name]
             gen_s = gen_schemas[name]
             s_errors = deep_diff("", ref_s, gen_s, name)
-            if s_errors:
-                changed_names.append(name)
-                print(f"    {name}: {red(str(len(s_errors)))} diff(s)")
-                for e in s_errors:
-                    print(f"      - {dim(e)}")
+            if not s_errors:
+                continue
+            changed_names.append(name)
+            cats = _categorize_errors(s_errors)
+            if cats["aprop"]:
+                all_aprop_schemas.add(name)
+            # Only show this schema in detail if it has structural changes
+            if cats["struct"] or (cats["desc"] and not cats["aprop"] and not cats["struct"]):
+                non_desc = len(s_errors) - len(cats["desc"])
+                if non_desc:
+                    print(f"    {name}: {red(str(non_desc))} non-description diff(s)")
+                else:
+                    print(f"    {name}: {dim('description-only')} ({len(cats['desc'])} diff(s))")
+
+        # Grouped additionalProperties report
+        if all_aprop_schemas:
+            print(f"    {yellow('additionalProperties:')} present in {len(all_aprop_schemas)} schema(s)")
+            print(f"      {dim('added by LinkML JSON Schema generator (additionalProperties: false)')}")
+            print(f"      {dim('affected:')} {', '.join(sorted(all_aprop_schemas))}")
+
         unchanged = len(common) - len(changed_names)
         print(f"    {dim('Common schemas:')} {green(str(unchanged))} identical, {yellow(str(len(changed_names)))} changed")
+    else:
+        print(f"    {green('No common schemas')}")
 
     print(f"\n{cyan('=' * 60)}")
     total_errors = len(deep_diff("", ref, gen, ""))
