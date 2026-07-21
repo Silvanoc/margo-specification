@@ -11,9 +11,6 @@ description: >-
   The structure of the ApplicationDescription object to be provided in the YAML document
   specified in this page.
   Some examples are provided also [at the bottom of this page](#examples).
-
-  Pre-data-model reference https://github.com/margo/specification/blob/3519aa7be4b565b2e2395134b99778fdc0379ace/system-design/specification/applications/application-registry.md
-  for the application registry specification.
 version: 1.0.0
 prefixes:
   linkml: https://w3id.org/linkml/
@@ -25,7 +22,6 @@ imports:
 
 default_prefix: margo
 # default_range: string  # https://github.com/linkml/linkml/issues/1483
-
 
 # Class Definitions
 classes:
@@ -384,4 +380,3 @@ classes:
         range: string
         multivalued: true
         required: true
-

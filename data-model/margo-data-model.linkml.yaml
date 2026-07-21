@@ -55,8 +55,6 @@ types:
       Format: "{id}[/{id}[/{id}...]]". The top-level id is required and must include only
       unreserved characters as specified in RFC3986. Subsequent ids indicate child devices
       in a gateway hierarchy and must also use only unreserved characters.
-
-      Pre-data-model reference https://github.com/margo/specification/blob/cea236c3a1cf96cb613a84cda464e638b7769dd9/system-design/specification/margo-management-interface/device-capabilities.md#route-parameters
     uri: xsd:string
     base: str
     pattern: '^[A-Za-z0-9._~-]+(\/[A-Za-z0-9._~-]+)*$'

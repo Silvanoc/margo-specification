@@ -4,8 +4,6 @@ name: DeviceResources
 description: >-
   Shared resource types used by both device capabilities and application descriptions
   to describe hardware resources (CPU, memory, storage, peripherals, communication interfaces).
-
-  Pre-data-model reference https://github.com/margo/specification/blob/3519aa7be4b565b2e2395134b99778fdc0379ace/system-design/specification/margo-management-interface/device-capabilities.md#resources-attributes
 version: 1.0.0
 prefixes:
   linkml: https://w3id.org/linkml/
@@ -20,8 +18,6 @@ classes:
   Resources:
     description: >-
       Required resources element specifying the resources required to install the application.
-
-      Pre-data-model reference https://github.com/margo/specification/blob/3519aa7be4b565b2e2395134b99778fdc0379ace/system-design/specification/margo-management-interface/device-capabilities.md#resources-attributes
     slots:
       - cpu
       - memory
@@ -32,8 +28,6 @@ classes:
   CPU:
     description: >-
       CPU element specifying the CPU requirements for the application.
-
-      Pre-data-model reference https://github.com/margo/specification/blob/3519aa7be4b565b2e2395134b99778fdc0379ace/system-design/specification/margo-management-interface/device-capabilities.md#cpu-attributes
     attributes:
       cores:
         description:
@@ -57,8 +51,6 @@ classes:
   DevicePeripheral:
     description: >-
       Peripheral hardware of a device.
-
-      Pre-data-model reference https://github.com/margo/specification/blob/3519aa7be4b565b2e2395134b99778fdc0379ace/system-design/specification/margo-management-interface/device-capabilities.md#peripheral-attributes
     attributes:
       type:
         description:
@@ -79,8 +71,6 @@ classes:
   DeviceCommunicationInterface:
     description: >-
       Communication interface of a device.
-
-      Pre-data-model reference https://github.com/margo/specification/blob/3519aa7be4b565b2e2395134b99778fdc0379ace/system-design/specification/margo-management-interface/device-capabilities.md#communicationinterface-attributes
     attributes:
       type:
         description:
@@ -95,8 +85,6 @@ slots:
     description: >-
       CPU element specifying the CPU requirements for the application.
       See the [CPU](#cpu-attributes) section below.
-
-      Pre-data-model reference https://github.com/margo/specification/blob/3519aa7be4b565b2e2395134b99778fdc0379ace/system-design/specification/margo-management-interface/device-capabilities.md#cpu-attributes
     range: CPU
 
   memory:
@@ -120,8 +108,6 @@ slots:
     description: >-
       Peripherals element specifying the peripherals required to run the application.
       See the [Peripheral](#peripheral-attributes) section below.
-
-      Pre-data-model reference https://github.com/margo/specification/blob/3519aa7be4b565b2e2395134b99778fdc0379ace/system-design/specification/margo-management-interface/device-capabilities.md#peripheral-attributes
     range: DevicePeripheral
     multivalued: true
     inlined: true
@@ -131,8 +117,6 @@ slots:
     description: >-
       Interfaces element specifying the communication interfaces required to run the application.
       See the [Communication Interfaces](#communicationinterface-attributes) section below.
-
-      Pre-data-model reference https://github.com/margo/specification/blob/3519aa7be4b565b2e2395134b99778fdc0379ace/system-design/specification/margo-management-interface/device-capabilities.md#communicationinterface-attributes
     range: DeviceCommunicationInterface
     multivalued: true
     inlined: true
@@ -142,8 +126,6 @@ enums:
   CpuArchitectureType:
     description: >-
       Permissible CPU architecture values.
-
-      Pre-data-model reference https://github.com/margo/specification/blob/3519aa7be4b565b2e2395134b99778fdc0379ace/system-design/specification/margo-management-interface/device-capabilities.md#cpuarchitecturetype
     permissible_values:
       amd64:
         description: AMD 64-bit architecture.
@@ -162,8 +144,6 @@ enums:
   CommunicationInterfaceType:
     description: >-
       Permissible communication interface types.
-
-      Pre-data-model reference https://github.com/margo/specification/blob/3519aa7be4b565b2e2395134b99778fdc0379ace/system-design/specification/margo-management-interface/device-capabilities.md#communicationinterfacetype
     permissible_values:
       ethernet:
         description: This type stands for an Ethernet interface.
@@ -185,8 +165,6 @@ enums:
   PeripheralType:
     description: >-
       Permissible peripheral types.
-
-      Pre-data-model reference https://github.com/margo/specification/blob/3519aa7be4b565b2e2395134b99778fdc0379ace/system-design/specification/margo-management-interface/device-capabilities.md#peripheraltype
     permissible_values:
       gpu:
         description: This type stands for a Graphics Processing Unit (GPU) peripheral.
