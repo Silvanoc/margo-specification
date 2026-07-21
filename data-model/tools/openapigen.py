@@ -298,6 +298,27 @@ class OpenApiGenerator(Generator):
             "OpenAPI template is missing 'schemas' section under 'components'"
         )
 
+    def _strip_additional_properties(self, data_schemas: dict) -> dict:
+        """Remove ``additionalProperties`` from all generated schemas.
+
+        Workaround for LinkML bug: ``not_closed=True`` only affects the top-level
+        schema, not individual class schemas (``handle_class`` hardcodes
+        ``additional_properties = False``).  Remove when
+        `https://github.com/linkml/linkml/issues/3611` is fixed upstream.
+        """
+
+        def _walk(obj):
+            if isinstance(obj, dict):
+                obj.pop("additionalProperties", None)
+                for v in obj.values():
+                    _walk(v)
+            elif isinstance(obj, list):
+                for item in obj:
+                    _walk(item)
+
+        _walk(data_schemas)
+        return data_schemas
+
     def serialize(self, template_file: str = "", **kwargs) -> str:
         """Generate an OpenAPI v3.0.3 spec from ``template_file`` and the loaded LinkML schema."""
         if not template_file:
@@ -424,6 +445,7 @@ class OpenApiGenerator(Generator):
         for data_schema in sanitized_data_schemas.values():
             data_schema.pop("title", None)
         sanitized_data_schemas = self._fix_openapi_spec(sanitized_data_schemas)
+        sanitized_data_schemas = self._strip_additional_properties(sanitized_data_schemas)
         if self._renaming:
             sanitized_data_schemas = self._rename(sanitized_data_schemas)
         if self.inline_enums:
