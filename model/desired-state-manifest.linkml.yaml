@@ -113,7 +113,7 @@ types:
   SizeBytesType:
     description: Size of an element in bytes.
     uri: xsd:nonNegativeInteger
-    base: integer
+    base: int
     minimum_value: 0
   UrlType:
     description: Endpoint (URL without schema and domain) associated to an element.

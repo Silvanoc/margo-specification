@@ -16,33 +16,56 @@ import yaml
 # ── Color support ──────────────────────────────────────────────
 _USE_COLOR = sys.stdout.isatty()
 
+
 def _c(code: str, text: str) -> str:
     return f"\033[{code}m{text}\033[0m" if _USE_COLOR else text
 
-def bold(text: str) -> str:    return _c("1", text)
-def green(text: str) -> str:   return _c("32", text)
-def red(text: str) -> str:     return _c("31", text)
-def yellow(text: str) -> str:  return _c("33", text)
-def cyan(text: str) -> str:    return _c("36", text)
-def dim(text: str) -> str:     return _c("2", text)
+
+def bold(text: str) -> str:
+    return _c("1", text)
+
+
+def green(text: str) -> str:
+    return _c("32", text)
+
+
+def red(text: str) -> str:
+    return _c("31", text)
+
+
+def yellow(text: str) -> str:
+    return _c("33", text)
+
+
+def cyan(text: str) -> str:
+    return _c("36", text)
+
+
+def dim(text: str) -> str:
+    return _c("2", text)
+
+
 # ───────────────────────────────────────────────────────────────
 
 
-ROOT = Path(__file__).resolve().parent.parent.parent
+ROOT = Path(__file__).resolve().parent.parent
 PRE_DRAFT_FILE = "system-design/specification/margo-management-interface/workload-management-api-1.0.0.yaml"
-GENERATED_FILE = "generated/openapi/workload-management-api-1.0.0.openapi.yaml"
+GENERATED_FILE = "system-design/specification/margo-management-interface/workload-management-api-1.0.0.yaml"
+# GENERATED_FILE = "build/artifacts/openapi/workload-management-api-1.0.0.openapi.yaml"
 
 
 def get_pre_draft_spec() -> dict:
     """Retrieve the OpenAPI spec from the pre-draft branch."""
     result = subprocess.run(
         ["git", "show", f"pre-draft:{PRE_DRAFT_FILE}"],
-        capture_output=True, text=True, cwd=ROOT,
+        capture_output=True,
+        text=True,
+        cwd=ROOT,
     )
-    if result.returncode != 0:
-        print(f"ERROR: could not retrieve pre-draft file: {result.stderr}", file=sys.stderr)
-        sys.exit(1)
-    return yaml.safe_load(result.stdout)
+    if result.returncode == 0:
+        return yaml.safe_load(result.stdout)
+    print(f"ERROR: could not retrieve pre-draft file: {result.stderr}", file=sys.stderr)
+    sys.exit(1)
 
 
 def get_generated_spec() -> dict:
@@ -61,7 +84,9 @@ def deep_diff(label: str, ref, gen, path: str = "", errors: list | None = None) 
         errors = []
 
     if type(ref) != type(gen):
-        errors.append(f"{path}: TYPE MISMATCH — {type(ref).__name__} vs {type(gen).__name__}")
+        errors.append(
+            f"{path}: TYPE MISMATCH — {type(ref).__name__} vs {type(gen).__name__}"
+        )
         return errors
 
     if isinstance(ref, dict):
@@ -137,12 +162,16 @@ def compare_section(label: str, ref: dict, gen: dict, path: str, errors: list) -
         print(f"  {label}: {green('✓ IDENTICAL')}")
 
 
-MARKER_LINE = "  # Schemas removed because they are neither direct nor transitive requirements:"
+MARKER_LINE = (
+    "  # Schemas removed because they are neither direct nor transitive requirements:"
+)
 
-TEMPLATE_FILE = "data-model/tools/workload-management-api-1.0.0.openapi.yaml"
+TEMPLATE_FILE = "tools/templates/openapi/workload-management-api-1.0.0.openapi.yaml"
 
 # Pattern for standardized INLINED comments: <name> INLINED into <target>(OpenAPI)[/<class>(LinkML)]
-INLINED_PATTERN = re.compile(r"#\s*-\s*(\S+)\s+INLINED\s+into\s+\S+\(OpenAPI\)(?:/\S+\(LinkML\))?")
+INLINED_PATTERN = re.compile(
+    r"#\s*-\s*(\S+)\s+INLINED\s+into\s+\S+\(OpenAPI\)(?:/\S+\(LinkML\))?"
+)
 
 
 def get_inlined_schemas() -> set[str]:
@@ -183,8 +212,13 @@ def find_rename_candidates(
     Compares property sets, required fields, and type (excluding descriptions).
     Returns (ref_name, gen_name, score) tuples sorted by descending score.
     """
+
     def _signature(name: str, s: dict) -> dict:
-        props = set(s.get("properties", {}).keys()) if isinstance(s.get("properties"), dict) else set()
+        props = (
+            set(s.get("properties", {}).keys())
+            if isinstance(s.get("properties"), dict)
+            else set()
+        )
         req = set(s.get("required", []))
         typ = s.get("type")
         return {"props": props, "req": req, "type": typ, "name": name}
@@ -253,7 +287,8 @@ def _schema_signature(s: dict) -> dict:
         "properties": set(props.keys()) if isinstance(props, dict) else set(),
         "required": set(s.get("required", [])),
         "enum": sorted(s.get("enum", [])) if isinstance(s.get("enum"), list) else [],
-        "additionalProperties": isinstance(s.get("additionalProperties"), dict) or s.get("additionalProperties") is True,
+        "additionalProperties": isinstance(s.get("additionalProperties"), dict)
+        or s.get("additionalProperties") is True,
     }
 
 
@@ -323,7 +358,9 @@ def find_inlined_candidates(
     Returns [(gen_name, parent.property_path, score), ...] sorted by descending score.
     """
     inline_props = _collect_inline_properties(ref_schemas)
-    gen_sigs = {n: _schema_signature(s) for n, s in gen_schemas.items() if n in extra_gen}
+    gen_sigs = {
+        n: _schema_signature(s) for n, s in gen_schemas.items() if n in extra_gen
+    }
     if not gen_sigs:
         return []
 
@@ -342,7 +379,8 @@ def find_inlined_candidates(
             req_score = (
                 1.0
                 if not rs["required"] and not gs["required"]
-                else len(rs["required"] & gs["required"]) / len(rs["required"] | gs["required"])
+                else len(rs["required"] & gs["required"])
+                / len(rs["required"] | gs["required"])
             )
             score = round(0.7 * prop_score + 0.3 * req_score, 3)
             candidates.append((gen_name, prop_path, score))
@@ -371,7 +409,11 @@ def _resolve_schema_name(
 def _collect_refs(obj, results: set[str], prefix: str = "#/components/schemas/"):
     """Recursively collect all $ref target names from a schema definition."""
     if isinstance(obj, dict):
-        if "$ref" in obj and isinstance(obj["$ref"], str) and obj["$ref"].startswith(prefix):
+        if (
+            "$ref" in obj
+            and isinstance(obj["$ref"], str)
+            and obj["$ref"].startswith(prefix)
+        ):
             results.add(obj["$ref"].replace(prefix, ""))
         for v in obj.values():
             _collect_refs(v, results, prefix)
@@ -391,6 +433,7 @@ def _find_referers(
     # Check paths
     for path, methods in gen_paths.items():
         for method, spec in methods.items():
+
             def _check(obj):
                 if isinstance(obj, dict):
                     if "$ref" in obj and obj["$ref"] == target:
@@ -401,6 +444,7 @@ def _find_referers(
                 elif isinstance(obj, list):
                     for item in obj:
                         _check(item)
+
             _check(spec)
 
     # Check schemas
@@ -460,7 +504,9 @@ def _show_schema_detail(raw_name: str, show_yaml: bool = False) -> None:
         if schema_name in common:
             s_errors = deep_diff("", ref_schemas[schema_name], gen_s, schema_name)
             cats = _categorize_errors(s_errors)
-            status = f"{red(str(len(s_errors)))} diff(s)" if s_errors else green("identical")
+            status = (
+                f"{red(str(len(s_errors)))} diff(s)" if s_errors else green("identical")
+            )
             print(f"  Status: {status}")
             if cats["desc"]:
                 print(f"    {dim('Description-only')} ({len(cats['desc'])}):")
@@ -507,17 +553,27 @@ def _show_schema_detail(raw_name: str, show_yaml: bool = False) -> None:
 
         # Inline / extra context
         if schema_name in only_gen:
-            candidates = find_inlined_candidates(ref_schemas, {schema_name: gen_s}, {schema_name})
+            candidates = find_inlined_candidates(
+                ref_schemas, {schema_name: gen_s}, {schema_name}
+            )
             if candidates:
                 best = max(candidates, key=lambda x: x[2])
-                print(f"  {yellow('Inferred inlined')} in pre-draft at {best[1]} (score {best[2]})")
+                print(
+                    f"  {yellow('Inferred inlined')} in pre-draft at {best[1]} (score {best[2]})"
+                )
         elif schema_name in common:
             pre_s = ref_schemas.get(schema_name, {})
             props = pre_s.get("properties", {})
             if isinstance(props, dict):
-                inlined_props = [k for k, v in props.items() if isinstance(v, dict) and "$ref" not in v and "properties" in v]
+                inlined_props = [
+                    k
+                    for k, v in props.items()
+                    if isinstance(v, dict) and "$ref" not in v and "properties" in v
+                ]
                 if inlined_props:
-                    print(f"  {dim('Pre-draft inlined properties:')} {', '.join(inlined_props)}")
+                    print(
+                        f"  {dim('Pre-draft inlined properties:')} {', '.join(inlined_props)}"
+                    )
 
         # Property-level comparison
         if schema_name in common:
@@ -530,21 +586,43 @@ def _show_schema_detail(raw_name: str, show_yaml: bool = False) -> None:
                 only_pre = pre_keys_set - gen_keys_set
                 only_gen_p = gen_keys_set - pre_keys_set
                 if only_pre:
-                    print(f"  {red('Properties only in pre-draft:')} {sorted(only_pre)}")
+                    print(
+                        f"  {red('Properties only in pre-draft:')} {sorted(only_pre)}"
+                    )
                 if only_gen_p:
-                    print(f"  {yellow('Properties only in generated:')} {sorted(only_gen_p)}")
+                    print(
+                        f"  {yellow('Properties only in generated:')} {sorted(only_gen_p)}"
+                    )
 
         # YAML dump
         if show_yaml:
             print(f"\n{dim('─' * 40)}")
-            pre_s = ref_schemas.get(schema_name, ref_schemas.get(raw_name)) if schema_name in common else None
+            pre_s = (
+                ref_schemas.get(schema_name, ref_schemas.get(raw_name))
+                if schema_name in common
+                else None
+            )
             gen_s = gen_schemas.get(schema_name)
             if pre_s:
                 print(f"\n{bold('Pre-draft')} ({schema_name}):")
-                print(yaml.dump(pre_s, default_flow_style=False, sort_keys=False, allow_unicode=True).rstrip())
+                print(
+                    yaml.dump(
+                        pre_s,
+                        default_flow_style=False,
+                        sort_keys=False,
+                        allow_unicode=True,
+                    ).rstrip()
+                )
             if gen_s:
                 print(f"\n{bold('Generated')} ({schema_name}):")
-                print(yaml.dump(gen_s, default_flow_style=False, sort_keys=False, allow_unicode=True).rstrip())
+                print(
+                    yaml.dump(
+                        gen_s,
+                        default_flow_style=False,
+                        sort_keys=False,
+                        allow_unicode=True,
+                    ).rstrip()
+                )
 
     else:
         if schema_name in only_ref:
@@ -557,7 +635,9 @@ def _show_schema_detail(raw_name: str, show_yaml: bool = False) -> None:
                 props = pre_s.get("properties", {})
                 if isinstance(props, dict):
                     for pk, pv in props.items():
-                        ref_type = pv.get("type", "object") if isinstance(pv, dict) else "N/A"
+                        ref_type = (
+                            pv.get("type", "object") if isinstance(pv, dict) else "N/A"
+                        )
                         print(f"    {pk}: {ref_type}")
 
 
@@ -566,11 +646,13 @@ def main():
         description="Compare pre-draft vs generated OpenAPI spec"
     )
     parser.add_argument(
-        "--schema", "-s",
+        "--schema",
+        "-s",
         help="Show verbose details for a single schema only (name in generated output)",
     )
     parser.add_argument(
-        "--yaml", "-y",
+        "--yaml",
+        "-y",
         action="store_true",
         help="Show YAML of both pre-draft and generated schemas (use with -s)",
     )
@@ -610,9 +692,13 @@ def main():
     common_p = ref_pkeys & gen_pkeys
 
     if only_ref_p:
-        print(f"  {red('MISSING IN GENERATED')} ({len(only_ref_p)}): {sorted(only_ref_p)}")
+        print(
+            f"  {red('MISSING IN GENERATED')} ({len(only_ref_p)}): {sorted(only_ref_p)}"
+        )
     if only_gen_p:
-        print(f"  {yellow('EXTRA IN GENERATED')} ({len(only_gen_p)}): {sorted(only_gen_p)}")
+        print(
+            f"  {yellow('EXTRA IN GENERATED')} ({len(only_gen_p)}): {sorted(only_gen_p)}"
+        )
 
     for path in sorted(common_p):
         ref_methods = ref_paths[path]
@@ -623,11 +709,15 @@ def main():
         only_gen_m = gen_mkeys - ref_mkeys
 
         if only_ref_m or only_gen_m:
-            print(f"  {yellow(path)}: METHOD DIFF — ref={sorted(ref_mkeys)} gen={sorted(gen_mkeys)}")
+            print(
+                f"  {yellow(path)}: METHOD DIFF — ref={sorted(ref_mkeys)} gen={sorted(gen_mkeys)}"
+            )
         else:
             all_method_ok = True
             for method in sorted(ref_mkeys):
-                errs = deep_diff(path, ref_methods[method], gen_methods[method], f"{path}.{method}")
+                errs = deep_diff(
+                    path, ref_methods[method], gen_methods[method], f"{path}.{method}"
+                )
                 if errs:
                     all_method_ok = False
                     print(f"  {path}.{method}: {red(str(len(errs)))} diff(s)")
@@ -672,13 +762,17 @@ def main():
             best_per_schema[gen_name] = (prop_path, score)
     high_scoring_inlined = []
     explained_extra: set[str] = set()
-    for gen_name, (prop_path, score) in sorted(best_per_schema.items(), key=lambda x: -x[1][1]):
+    for gen_name, (prop_path, score) in sorted(
+        best_per_schema.items(), key=lambda x: -x[1][1]
+    ):
         if score >= 0.9:
             high_scoring_inlined.append((gen_name, prop_path, score))
             explained_extra.add(gen_name)
     unexplained_extra = only_gen - explained_extra
 
-    print(f"\n  Schemas ({bold(str(len(ref_keys)))} ref, {bold(str(len(gen_keys)))} gen, {bold(str(len(not_needed)))} NOT-NEEDED, {bold(str(len(inlined)))} INLINED):")
+    print(
+        f"\n  Schemas ({bold(str(len(ref_keys)))} ref, {bold(str(len(gen_keys)))} gen, {bold(str(len(not_needed)))} NOT-NEEDED, {bold(str(len(inlined)))} INLINED):"
+    )
 
     if xlinkml_renames:
         print(f"    {dim('x-linkml-source RENAMES')} ({len(xlinkml_renames)}):")
@@ -689,23 +783,35 @@ def main():
         not_needed_only = intentionally_omitted & not_needed
         inlined_only = intentionally_omitted & inlined
         if not_needed_only:
-            print(f"    {dim('NOT-NEEDED')} ({len(not_needed_only)}): {sorted(not_needed_only)}")
+            print(
+                f"    {dim('NOT-NEEDED')} ({len(not_needed_only)}): {sorted(not_needed_only)}"
+            )
         if inlined_only:
-            print(f"    {dim('INLINED SUBSCHEMAS')} ({len(inlined_only)}): {sorted(inlined_only)}")
+            print(
+                f"    {dim('INLINED SUBSCHEMAS')} ({len(inlined_only)}): {sorted(inlined_only)}"
+            )
 
     if truly_missing:
-        print(f"    {red('MISSING IN GENERATED')} ({len(truly_missing)}): {sorted(truly_missing)}")
+        print(
+            f"    {red('MISSING IN GENERATED')} ({len(truly_missing)}): {sorted(truly_missing)}"
+        )
 
     if high_scoring_inlined:
         print(f"    {yellow('INFERRED INLINED')} ({len(high_scoring_inlined)}):")
-        for gen_name, prop_path, score in sorted(high_scoring_inlined, key=lambda x: -x[2]):
+        for gen_name, prop_path, score in sorted(
+            high_scoring_inlined, key=lambda x: -x[2]
+        ):
             print(f"      {gen_name} inlined into {prop_path} (score {score})")
 
     if unexplained_extra:
-        print(f"    {yellow('EXTRA IN GENERATED')} ({len(unexplained_extra)}): {sorted(unexplained_extra)}")
+        print(
+            f"    {yellow('EXTRA IN GENERATED')} ({len(unexplained_extra)}): {sorted(unexplained_extra)}"
+        )
 
     if rename_candidates:
-        print(f"    {dim('RENAME CANDIDATES')} (missing → extra, by structural similarity):")
+        print(
+            f"    {dim('RENAME CANDIDATES')} (missing → extra, by structural similarity):"
+        )
         shown = 0
         for ref_name, gen_name, score in rename_candidates:
             if ref_name in truly_missing and gen_name in unexplained_extra:
@@ -730,21 +836,31 @@ def main():
             if cats["aprop"]:
                 all_aprop_schemas.add(name)
             # Only show this schema in detail if it has structural changes
-            if cats["struct"] or (cats["desc"] and not cats["aprop"] and not cats["struct"]):
+            if cats["struct"] or (
+                cats["desc"] and not cats["aprop"] and not cats["struct"]
+            ):
                 non_desc = len(s_errors) - len(cats["desc"])
                 if non_desc:
                     print(f"    {name}: {red(str(non_desc))} non-description diff(s)")
                 else:
-                    print(f"    {name}: {dim('description-only')} ({len(cats['desc'])} diff(s))")
+                    print(
+                        f"    {name}: {dim('description-only')} ({len(cats['desc'])} diff(s))"
+                    )
 
         # Grouped additionalProperties report
         if all_aprop_schemas:
-            print(f"    {yellow('additionalProperties:')} present in {len(all_aprop_schemas)} schema(s)")
-            print(f"      {dim('added by LinkML JSON Schema generator (additionalProperties: false)')}")
+            print(
+                f"    {yellow('additionalProperties:')} present in {len(all_aprop_schemas)} schema(s)"
+            )
+            print(
+                f"      {dim('added by LinkML JSON Schema generator (additionalProperties: false)')}"
+            )
             print(f"      {dim('affected:')} {', '.join(sorted(all_aprop_schemas))}")
 
         unchanged = len(common) - len(changed_names)
-        print(f"    {dim('Common schemas:')} {green(str(unchanged))} identical, {yellow(str(len(changed_names)))} changed")
+        print(
+            f"    {dim('Common schemas:')} {green(str(unchanged))} identical, {yellow(str(len(changed_names)))} changed"
+        )
     else:
         print(f"    {green('No common schemas')}")
 

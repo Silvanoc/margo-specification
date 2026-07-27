@@ -13,9 +13,9 @@ set -eu
 THIS_SCRIPT="$(readlink -f "${0}")"
 THIS_DIR="$(dirname "${THIS_SCRIPT}")"
 
-ROOT_DIR="$(dirname "$(dirname "${THIS_DIR}")")"
+ROOT_DIR="$(dirname "${THIS_DIR}")"
 
-TGT_DIR="${ROOT_DIR}/generated/diagrams"
+TGT_DIR="${ROOT_DIR}/build/artifacts/diagrams"
 
 if command -v poetry &>/dev/null; then
   RUN="poetry run"
@@ -34,7 +34,7 @@ fi
 mkdir -p "${TGT_DIR}"
 
 # Holistic class diagram
-${RUN} linkml generate plantuml "${ROOT_DIR}/data-model/margo-data-model.linkml.yaml" |
+${RUN} linkml generate plantuml "${ROOT_DIR}/model/margo-data-model.linkml.yaml" |
   sed "s/@enduml/DeploymentAnnotations ..> ApplicationDescription\n@enduml/" |
   sed "s/@enduml/DeploymentStatusManifest ..> ApplicationDeployment\n@enduml/" |
   sed "s/@enduml/DesiredStateManifest ..> ApplicationDeployment\n@enduml/" >"${TMP_PLANTUML_FILE}"
@@ -53,7 +53,7 @@ ${RUN} linkml generate plantuml \
   --classes Parameter \
   --classes Configuration \
   --classes DeploymentProfileDescription \
-  "${ROOT_DIR}/data-model/application-description.linkml.yaml" |
+  "${ROOT_DIR}/model/application-description.linkml.yaml" |
   sed "/Component.*{$/,/}/d" \
     >"${TMP_PLANTUML_FILE}"
 
@@ -64,7 +64,7 @@ ${RUN} linkml generate plantuml \
   --classes DeploymentStatusManifest \
   --classes ApplicationDeployment \
   --classes DeploymentProfile \
-  "${ROOT_DIR}/data-model/margo-data-model.linkml.yaml" |
+  "${ROOT_DIR}/model/margo-data-model.linkml.yaml" |
   sed "s/@enduml/DeploymentStatusManifest ..> ApplicationDeployment\n@enduml/" |
   sed "s/@enduml/ComponentStatus ..> Component\n@enduml/" \
     >"${TMP_PLANTUML_FILE}"
@@ -74,7 +74,7 @@ curl -H "Content-Type: test/plain" --silent --data-binary @"${TMP_PLANTUML_FILE}
 # Class diagram focused on DesiredStateManifest
 ${RUN} linkml generate plantuml \
   --classes DesiredStateManifest \
-  "${ROOT_DIR}/data-model/margo-data-model.linkml.yaml" |
+  "${ROOT_DIR}/model/margo-data-model.linkml.yaml" |
   sed "s/@enduml/DesiredStateManifest ..> ApplicationDeployment\n@enduml/" \
     >"${TMP_PLANTUML_FILE}"
 
@@ -85,7 +85,7 @@ ${RUN} linkml generate plantuml \
   --classes DeviceCapabilitiesManifest \
   --classes Properties \
   --classes Resources \
-  "${ROOT_DIR}/data-model/margo-data-model.linkml.yaml" \
+  "${ROOT_DIR}/model/margo-data-model.linkml.yaml" \
   >"${TMP_PLANTUML_FILE}"
 
 curl -H "Content-Type: test/plain" --silent --data-binary @"${TMP_PLANTUML_FILE}" https://kroki.io/plantuml/svg -o "${TGT_DIR}/DeviceCapabilities-ClassDiagram.svg"
@@ -101,7 +101,7 @@ ${RUN} linkml generate plantuml \
   --classes ComposeDeploymentProfile \
   --classes HelmDeploymentProfile \
   --classes Component \
-  "${ROOT_DIR}/data-model/application-deployment.linkml.yaml" |
+  "${ROOT_DIR}/model/application-deployment.linkml.yaml" |
   sed "s/@enduml/DeploymentAnnotations ..> ApplicationDescription\n@enduml/" \
     >"${TMP_PLANTUML_FILE}"
 

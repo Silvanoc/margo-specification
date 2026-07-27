@@ -10,19 +10,7 @@ The final HTML documentation is built with [MkDocs](https://www.mkdocs.org/) usi
 
 ```
 .
-├── src/specification/                    # Legacy per-resource LinkML schemas + Jinja2 templates + examples
-│   ├── applications/
-│   │   ├── application-description.linkml.yaml
-│   │   └── resources/
-│   │       ├── class.md.jinja2
-│   │       ├── index.md.jinja2
-│   │       └── examples/{valid,invalid}/
-│   └── margo-management-interface/
-│       ├── desired-state.linkml.yaml
-│       └── resources/
-│           ├── index.md.jinja2
-│           └── examples/{valid,invalid}/
-├── data-model/                           # Aggregate data model (current source of truth)
+├── model/                                # Aggregate data model (current source of truth)
 │   ├── margo-data-model.linkml.yaml      # Top-level schema aggregating all sub-schemas
 │   ├── application-description.linkml.yaml
 │   ├── application-deployment.linkml.yaml
@@ -31,29 +19,37 @@ The final HTML documentation is built with [MkDocs](https://www.mkdocs.org/) usi
 │   ├── deployment-status.linkml.yaml
 │   ├── margo-resources.linkml.yaml
 │   ├── margo-deployments.linkml.yaml
-│   ├── tools/                            # Generation & validation scripts
-│   │   ├── generate-all.bash             # Runs all generators in sequence
-│   │   ├── generate-docs.bash            # Generates MarkDown from LinkML
-│   │   ├── generate-json-schemas.bash    # Generates JSON-Schema artifacts
-│   │   ├── generate-openapi.bash         # Generates OpenAPI spec
-│   │   ├── generate-class-diagram.bash   # Generates PlantUML class diagrams
-│   │   ├── check-examples.bash           # Validates schemas and examples
-│   │   └── configurations/              # Per-spec JSON configs
-│   │       ├── application-deployment.json
-│   │       ├── application-description.json
-│   │       ├── deployment-status.json
-│   │       ├── desired-state-manifest.json
-│   │       └── device-capabilities.json
-│   ├── generation-gap.md                   # Differences between pre-draft and generated OpenAPI spec
-│   └── resources/
-│       ├── examples/{valid,invalid}/     # Valid and invalid example files
-│       ├── markdown-templates/           # Templates for the aggregate data-model docs
-│       └── markdown-templates_main-classes/ # Templates for per-resource docs
-├── doc-generation/                       # Legacy scripts (superseded by data-model/tools/)
-├── system-design/                        # Manually-authored + generated MarkDown (copied into merged/ by generate-docs.bash)
+│   ├── generation-gap.md                 # Differences between pre-draft and generated OpenAPI spec
+│   ├── examples/{valid,invalid}/         # Valid and invalid example files
+│   └── diagrams/                         # Static PNG diagrams
+├── tools/                                # Generation & validation scripts
+│   ├── generate-all.bash                 # Runs all generators in sequence
+│   ├── generate-docs.bash                # Generates MarkDown from LinkML
+│   ├── generate-json-schemas.bash        # Generates JSON-Schema artifacts
+│   ├── generate-openapi.bash             # Generates OpenAPI spec
+│   ├── generate-class-diagram.bash       # Generates PlantUML class diagrams
+│   ├── check-examples.bash               # Validates schemas and examples
+│   ├── openapigen.py                     # Custom OpenAPI generator
+│   ├── configurations/                   # Per-spec JSON configs
+│   │   ├── application-deployment.json
+│   │   ├── application-description.json
+│   │   ├── deployment-status.json
+│   │   ├── desired-state-manifest.json
+│   │   └── device-capabilities.json
+│   └── templates/
+│       ├── model/                        # Templates for the aggregate data-model docs
+│       ├── main-classes/                 # Templates for per-resource docs
+│       └── openapi/
+│           └── workload-management-api-1.0.0.openapi.yaml   # OpenAPI template
+├── docs/                                 # Manually-authored + generated MarkDown (copied into build/site/ by generate-docs.bash)
 │   └── specification/                    # ← generated .md files land here
-├── generated/                            # Additional generated artifacts (diagrams, OpenAPI, JSON-Schema, etc.)
-├── merged/                               # Merged MarkDown tree used by mkdocs build
+├── build/                                # Generated artifacts (tracked in git)
+│   ├── artifacts/                        # diagrams, OpenAPI, JSON-Schema, intermediate markdown
+│   └── site/                             # Merged MarkDown tree used by mkdocs build
+├── legacy/                               # Archived superseded trees
+│   ├── doc-generation/                   # Legacy scripts (superseded by tools/)
+│   ├── src-specification/                # Legacy per-resource schemas + templates + examples
+│   └── validate-openapi.py               # One-shot migration aid: compares generated spec vs pre-draft branch
 ├── mkdocs.yml                            # MkDocs configuration
 └── pyproject.toml                        # Python dependencies (linkml>=1.11.0, mkdocs, etc.)
 ```
@@ -81,20 +77,20 @@ pip install ./pyproject.toml
 ### Validate LinkML schemas and examples
 
 ```bash
-data-model/tools/check-examples.bash
+tools/check-examples.bash
 ```
 
 This script:
-- Reads each config from `data-model/tools/configurations/*.json`
+- Reads each config from `tools/configurations/*.json`
 - Validates the corresponding LinkML schema
-- Validates valid examples in `data-model/resources/examples/valid/` against the schema
-- Validates that invalid examples in `data-model/resources/examples/invalid/` are correctly rejected
+- Validates valid examples in `model/examples/valid/` against the schema
+- Validates that invalid examples in `model/examples/invalid/` are correctly rejected
 - Exits non-zero if any check fails
 
 ### Generate all artifacts
 
 ```bash
-data-model/tools/generate-all.bash
+tools/generate-all.bash
 ```
 
 This runs all generators in sequence: class diagrams, JSON-Schemas, OpenAPI, and MarkDown docs.
@@ -102,38 +98,38 @@ This runs all generators in sequence: class diagrams, JSON-Schemas, OpenAPI, and
 ### Generate MarkDown from LinkML
 
 ```bash
-data-model/tools/generate-docs.bash
+tools/generate-docs.bash
 ```
 
 This script:
-- Generates per-resource MarkDown using `data-model/resources/markdown-templates_main-classes/`
-- Generates the full data model MarkDown using `data-model/resources/markdown-templates/`
+- Generates per-resource MarkDown using `tools/templates/main-classes/`
+- Generates the full data model MarkDown using `tools/templates/model/`
 - Copies generated diagrams and OpenAPI spec into the merged tree
-- Copies everything from `system-design/` and `generated/` into `merged/` (which is what `mkdocs build` reads)
+- Copies everything from `docs/` and `build/artifacts/` into `build/site/` (which is what `mkdocs build` reads)
 
 ### Generate JSON-Schemas
 
 ```bash
-data-model/tools/generate-json-schemas.bash
+tools/generate-json-schemas.bash
 ```
 
-Generates one `.schema.json` file per resource schema into `generated/json-schemas/`.
+Generates one `.schema.json` file per resource schema into `build/artifacts/json-schemas/`.
 
 ### Generate OpenAPI spec
 
 ```bash
-data-model/tools/generate-openapi.bash
+tools/generate-openapi.bash
 ```
 
-Generates `workload-management-api-1.0.0.openapi.yaml` into `generated/openapi/`.
+Generates `workload-management-api-1.0.0.openapi.yaml` into `build/artifacts/openapi/`.
 
 ### Generate class diagrams
 
 ```bash
-data-model/tools/generate-class-diagram.bash
+tools/generate-class-diagram.bash
 ```
 
-Generates SVG/PNG class diagrams via PlantUML into `generated/diagrams/`.
+Generates SVG/PNG class diagrams via PlantUML into `build/artifacts/diagrams/`.
 
 ### Build HTML documentation
 
@@ -149,47 +145,47 @@ Understanding how artifacts flow through the pipeline is essential when modifyin
 ### Artifact flow
 
 ```
-data-model/*.linkml.yaml          (source of truth — LinkML schemas)
+model/*.linkml.yaml          (source of truth — LinkML schemas)
          │
-         ├──► data-model/tools/check-examples.bash
-         │       uses: data-model/tools/configurations/*.json
-         │       validates: data-model/resources/examples/{valid,invalid}/
+         ├──► tools/check-examples.bash
+         │       uses: tools/configurations/*.json
+         │       validates: model/examples/{valid,invalid}/
          │
-         ├──► data-model/tools/generate-docs.bash   (orchestrator)
+         ├──► tools/generate-docs.bash   (orchestrator)
          │       │
-         │       ├──► linkml generate doc  (per-resource, using markdown-templates_main-classes/)
-         │       │       → generated/markdown_main-classes/<schema>.md
-         │       │       → moved into merged/specification/{applications,margo-management-interface}/
+         │       ├──► linkml generate doc  (per-resource, using templates/main-classes/)
+         │       │       → build/artifacts/main-classes/<schema>.md
+         │       │       → moved into build/site/specification/{applications,margo-management-interface}/
          │       │
-         │       ├──► linkml generate doc  (aggregate, using markdown-templates/)
-         │       │       → generated/markdown/*
-         │       │       → moved into merged/data-model/
+         │       ├──► linkml generate doc  (aggregate, using templates/model/)
+         │       │       → build/artifacts/markdown/*
+         │       │       → moved into build/site/data-model/
          │       │
          │       ├──► generate-class-diagram.bash
-         │       │       → generated/diagrams/DataModel-ClassDiagram.{svg,png}
-         │       │       → copied into merged/figures/
+         │       │       → build/artifacts/diagrams/DataModel-ClassDiagram.{svg,png}
+         │       │       → copied into build/site/figures/
          │       │
          │       ├──► generate-openapi.bash
-         │       │       → generated/openapi/workload-management-api-1.0.0.openapi.yaml
-         │       │       → moved into merged/specification/margo-management-interface/
+         │       │       → build/artifacts/openapi/workload-management-api-1.0.0.openapi.yaml
+         │       │       → moved into build/site/specification/margo-management-interface/
          │       │
-         │       └──► JSON schemas copied into merged/json-schemas/
+         │       └──► JSON schemas copied into build/site/json-schemas/
          │
-         └──► data-model/tools/generate-json-schemas.bash   (standalone)
-                 → generated/json-schemas/*.schema.json
+         └──► tools/generate-json-schemas.bash   (standalone)
+                 → build/artifacts/json-schemas/*.schema.json
 
-mkdocs build  reads from merged/   →   site/
+mkdocs build  reads from build/site/   →   site/
 ```
 
 Key points:
-- `mkdocs build` reads from `merged/`, not directly from `system-design/` or `generated/`. The `generate-docs.bash` script copies everything into `merged/` first.
+- `mkdocs build` reads from `build/site/`, not directly from `docs/` or `build/artifacts/`. The `generate-docs.bash` script copies everything into `build/site/` first.
 - The per-resource Markdown generation and the aggregate data-model generation use **different template directories** and produce output in **different locations**.
-- `check-examples.bash` reads the list of schemas from `data-model/tools/configurations/*.json`, but `generate-docs.bash` and `generate-json-schemas.bash` have **hardcoded** schema lists. When adding a new resource, you must update all three.
+- `check-examples.bash` reads the list of schemas from `tools/configurations/*.json`, but `generate-docs.bash` and `generate-json-schemas.bash` have **hardcoded** schema lists. When adding a new resource, you must update all three.
 
 ### OpenAPI generation
 
-The OpenAPI spec is generated by `data-model/tools/openapigen.py`, which:
-- Reads an OpenAPI template (`data-model/tools/workload-management-api-1.0.0.openapi.yaml`) that defines endpoints, security schemes, and request/response structure.
+The OpenAPI spec is generated by `tools/openapigen.py`, which:
+- Reads an OpenAPI template (`tools/templates/openapi/workload-management-api-1.0.0.openapi.yaml`) that defines endpoints, security schemes, and request/response structure.
 - Fills in `components/schemas` from the LinkML model using the JSON-Schema generator.
 - Only classes referenced by the endpoints in the template are included in the output.
 
@@ -197,30 +193,32 @@ When adding a new resource to the API, you must update both the LinkML schema **
 
 ## Legacy Code
 
-The `src/specification/` directory contains the original per-resource LinkML schemas, templates, and examples. These are **legacy** and no longer the source of truth. The current source of truth is `data-model/`. Do not modify files under `src/specification/` unless specifically instructed.
+The `legacy/src-specification/` directory contains the original per-resource LinkML schemas, templates, and examples. These are **legacy** and no longer the source of truth. The current source of truth is `model/`. Do not modify files under `legacy/src-specification/` unless specifically instructed.
 
-The `doc-generation/` directory contains the original generation and validation scripts. These have been superseded by `data-model/tools/`. Do not use the old scripts.
+The `legacy/doc-generation/` directory contains the original generation and validation scripts. These have been superseded by `tools/`. Do not use the old scripts.
+
+The `legacy/validate-openapi.py` script is a one-shot migration aid that compares the generated OpenAPI spec against the hand-written spec on the `pre-draft` branch. It becomes obsolete once `pre-draft` is fully replaced by the generated spec, at which point it should be deleted.
 
 ## How to Modify the LinkML Data Model
 
 ### Step 1: Edit the schema
 
-The **source of truth** for LinkML-specified resources lives under `data-model/`. Each resource has its own `.linkml.yaml` file. The aggregate schema `data-model/margo-data-model.linkml.yaml` imports all sub-schemas.
+The **source of truth** for LinkML-specified resources lives under `model/`. Each resource has its own `.linkml.yaml` file. The aggregate schema `model/margo-data-model.linkml.yaml` imports all sub-schemas.
 
 When making changes:
 
 1. Edit the relevant `.linkml.yaml` file to add/modify classes, attributes, enums, slots, or types.
-2. Add or update valid examples in `data-model/resources/examples/valid/` to cover the new or changed model elements.
-3. Add invalid counter-examples in `data-model/resources/examples/invalid/` if new validation rules are introduced.
+2. Add or update valid examples in `model/examples/valid/` to cover the new or changed model elements.
+3. Add invalid counter-examples in `model/examples/invalid/` if new validation rules are introduced.
 4. If the change affects rendering, update the Jinja2 templates:
-   - `data-model/resources/markdown-templates_main-classes/` — for per-resource specification pages (attribute tables, examples, JSON-Schema links).
-   - `data-model/resources/markdown-templates/` — for the aggregate data-model documentation (class hierarchy, diagrams).
-5. If the change adds new API endpoints, update the OpenAPI template `data-model/tools/workload-management-api-1.0.0.openapi.yaml`.
+   - `tools/templates/main-classes/` — for per-resource specification pages (attribute tables, examples, JSON-Schema links).
+   - `tools/templates/model/` — for the aggregate data-model documentation (class hierarchy, diagrams).
+5. If the change adds new API endpoints, update the OpenAPI template `tools/templates/openapi/workload-management-api-1.0.0.openapi.yaml`.
 
 ### Step 2: Validate
 
 ```bash
-data-model/tools/check-examples.bash
+tools/check-examples.bash
 ```
 
 Fix any validation errors before proceeding.
@@ -228,12 +226,12 @@ Fix any validation errors before proceeding.
 ### Step 3: Regenerate artifacts
 
 ```bash
-data-model/tools/generate-all.bash
+tools/generate-all.bash
 ```
 
 This runs all generators in sequence. Alternatively, run individual generators if you only need to update one artifact type.
 
-The generated `.md` files land under `system-design/specification/` and `system-design/data-model/`. Generated JSON-Schemas, OpenAPI specs, and diagrams land under `generated/`. Verify the output looks correct.
+The generated `.md` files land under `docs/specification/` and `docs/data-model/`. Generated JSON-Schemas, OpenAPI specs, and diagrams land under `build/artifacts/`. Verify the output looks correct.
 
 ### Step 4: Preview the site
 
@@ -245,23 +243,23 @@ Open http://127.0.0.1:8000 and navigate to the relevant specification page to vi
 
 ### Step 5: Commit
 
-Include the modified LinkML schema, updated examples, and all regenerated artifacts (`system-design/`, `generated/`) in your commit. These directories are tracked in git and must reflect the generated output.
+Include the modified LinkML schema, updated examples, and all regenerated artifacts (`docs/`, `build/`) in your commit. These directories are tracked in git and must reflect the generated output.
 
 ## Adding a New LinkML-Specified Resource
 
-1. Add the LinkML schema: `data-model/<resource-name>.linkml.yaml`.
-2. Add valid examples: `data-model/resources/examples/valid/<TargetClass>-NNN.{yaml,json}`.
-3. Add invalid counter-examples: `data-model/resources/examples/invalid/<TargetClass>-NNN.{yaml,json}`.
-4. Add a configuration file in `data-model/tools/configurations/<resource-name>.json` with:
+1. Add the LinkML schema: `model/<resource-name>.linkml.yaml`.
+2. Add valid examples: `model/examples/valid/<TargetClass>-NNN.{yaml,json}`.
+3. Add invalid counter-examples: `model/examples/invalid/<TargetClass>-NNN.{yaml,json}`.
+4. Add a configuration file in `tools/configurations/<resource-name>.json` with:
    ```json
    {
-       "root": "data-model",
+       "root": "model",
        "targetclass": "<RootClassName>",
        "schemafile": "<resource-name>.linkml.yaml",
        "markdowndoc": "<output-filename>.md"
    }
    ```
-5. Add an import in `data-model/margo-data-model.linkml.yaml`.
+5. Add an import in `model/margo-data-model.linkml.yaml`.
 6. Add the new MarkDown file to `mkdocs.yml` under the `nav` section.
 7. Add the schema name to the hardcoded lists in `generate-docs.bash` (line 41) and `generate-json-schemas.bash` (line 24).
 8. Run validation and generation as described above.
@@ -285,8 +283,8 @@ There are two separate sets of templates that serve different purposes:
 
 | Template directory | Used by | Produces | Output location |
 | --- | --- | --- | --- |
-| `data-model/resources/markdown-templates_main-classes/` | `generate-docs.bash` (per-resource loop) | One `.md` per schema with attribute tables, examples, JSON-Schema links | `merged/specification/{applications,margo-management-interface}/` |
-| `data-model/resources/markdown-templates/` | `generate-docs.bash` (aggregate step) | Full data model overview with class hierarchy, diagrams, all-class listing | `merged/data-model/` |
+| `tools/templates/main-classes/` | `generate-docs.bash` (per-resource loop) | One `.md` per schema with attribute tables, examples, JSON-Schema links | `build/site/specification/{applications,margo-management-interface}/` |
+| `tools/templates/model/` | `generate-docs.bash` (aggregate step) | Full data model overview with class hierarchy, diagrams, all-class listing | `build/site/data-model/` |
 
 Each directory contains an `index.md.jinja2` (the main page) and may contain `class.md.jinja2` (individual class detail pages). When modifying rendering, determine which template directory to edit based on the table above.
 
@@ -300,8 +298,8 @@ Each directory contains an `index.md.jinja2` (the main page) and may contain `cl
 The GitHub Actions pipeline (`.github/workflows/pages.yml`) runs:
 
 1. **Quality checks** — validates `pyproject.toml` and `poetry.lock` consistency
-2. **Validation** — runs `data-model/tools/check-examples.bash`
-3. **Document generation** — runs `data-model/tools/generate-docs.bash`
+2. **Validation** — runs `tools/check-examples.bash`
+3. **Document generation** — runs `tools/generate-docs.bash`
 4. **Pages build & deploy** — deploys to GitHub Pages on the `pre-draft` branch
 
 PR checks (`.github/workflows/pr-checks.yml`) verify that commits are signed off.

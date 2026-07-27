@@ -1,5 +1,5 @@
 site_name: Specification (pre-draft)
-docs_dir: merged
+docs_dir: build/site
 
 nav:
   - What is Margo?: index.md

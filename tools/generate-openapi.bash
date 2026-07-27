@@ -5,12 +5,13 @@ set -eu
 THIS_SCRIPT="$(readlink -f "${0}")"
 THIS_DIR="$(dirname "${THIS_SCRIPT}")"
 
-ROOT_DIR="$(dirname "$(dirname "${THIS_DIR}")")"
+ROOT_DIR="$(dirname "${THIS_DIR}")"
 
-TGT_DIR="${ROOT_DIR}/generated/openapi"
+TGT_DIR="${ROOT_DIR}/build/artifacts/openapi"
 TGT_FILE="${TGT_DIR}/workload-management-api-1.0.0.openapi.yaml"
 
-# Tracked location in system-design/ — this is what mkdocs and the repo use
+# Tracked location in system-design/ — this is what the repo uses
+# generate-docs.bash copies system-design/ into build/site/ for mkdocs
 SYSTEM_DESIGN_FILE="${ROOT_DIR}/system-design/specification/margo-management-interface/workload-management-api-1.0.0.yaml"
 
 if command -v poetry &>/dev/null; then
@@ -27,20 +28,20 @@ mkdir -p "${TGT_DIR}"
 
 # TODO: remove following block after LinkML release >v1.11.1
 (
-  cd data-model/tools
-  poetry run python openapigen.py --keep-unreferenced --inline-enums -t workload-management-api-1.0.0.openapi.yaml ../margo-data-model.linkml.yaml \
+  cd "${THIS_DIR}"
+  ${RUN} python openapigen.py --keep-unreferenced --inline-enums -t templates/openapi/workload-management-api-1.0.0.openapi.yaml ../model/margo-data-model.linkml.yaml \
     >"${TGT_FILE}"
   cp "${TGT_FILE}" "${SYSTEM_DESIGN_FILE}"
 )
 exit
 
 ${RUN} linkml generate openapi \
-  --template "${THIS_DIR}/workload-management-api-1.0.0.openapi.yaml" \
+  --template "${THIS_DIR}/templates/openapi/workload-management-api-1.0.0.openapi.yaml" \
   --inline-enums \
   --keep-unreferenced \
-  "${ROOT_DIR}/data-model/margo-data-model.linkml.yaml" \
+  "${ROOT_DIR}/model/margo-data-model.linkml.yaml" \
   >"${TGT_FILE}"
 
 # Copy to the tracked location in system-design/ so it is picked up by
-# generate-docs.bash (which copies system-design/ → merged/) and by git
+# generate-docs.bash (which copies system-design/ → build/site/) and by git
 cp "${TGT_FILE}" "${SYSTEM_DESIGN_FILE}"

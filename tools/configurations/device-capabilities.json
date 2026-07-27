@@ -1,5 +1,5 @@
 {
-    "root": "data-model",
+    "root": "model",
     "targetclass": "DeviceCapabilitiesManifest",
     "schemafile": "device-capabilities.linkml.yaml",
     "markdowndoc": "device-capabilities.md"

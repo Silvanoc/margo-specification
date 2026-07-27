@@ -7,7 +7,7 @@ THIS_DIR="$(dirname "${THIS_SCRIPT}")"
 DOCS_GEN="${THIS_DIR}"
 CONFIGS="${DOCS_GEN}/configurations"
 
-ROOT_DIR="$(dirname "$(dirname "${THIS_DIR}")")"
+ROOT_DIR="$(dirname "${THIS_DIR}")"
 
 VERBOSITY="${1:-info}"
 
@@ -62,7 +62,7 @@ check_spec() {
   SCHEMA_FILE="$(jq -r '.schemafile' "${CONFIGS}/$1")"
   trace "Schema file: ${SCHEMA_FILE}"
 
-  EXAMPLES_DIR="${SPEC_ROOT}/resources/examples/valid"
+  EXAMPLES_DIR="${SPEC_ROOT}/examples/valid"
   trace "Examples folder: ${EXAMPLES_DIR}"
   FOUND_VALID=0
   for EXAMPLE in $(ls "${EXAMPLES_DIR}"/${TARGET_CLASS}-*.{yaml,json} 2>/dev/null); do
@@ -85,7 +85,7 @@ check_spec() {
     return 1
   fi
 
-  COUNTEREXAMPLES_DIR="${SPEC_ROOT}/resources/examples/invalid"
+  COUNTEREXAMPLES_DIR="${SPEC_ROOT}/examples/invalid"
   FOUND_INVALID=0
   for COUNTEREXAMPLE in $(ls "${COUNTEREXAMPLES_DIR}"/${TARGET_CLASS}-*.{yaml,json} 2>/dev/null); do
     FOUND_INVALID=1
@@ -113,8 +113,8 @@ check_spec() {
     # https://github.com/linkml/linkml/issues/2425
     ${RUN} linkml examples \
       --schema "${SPEC_ROOT}/application-description.linkml.yaml" \
-      --input-directory "${SPEC_ROOT}/resources/examples/valid" \
-      --counter-example-input-directory "${SPEC_ROOT}/resources/examples/invalid" \
+      --input-directory "${SPEC_ROOT}/examples/valid" \
+      --counter-example-input-directory "${SPEC_ROOT}/examples/invalid" \
       --output-directory "${SPEC_ROOT}/output"
   fi
 }

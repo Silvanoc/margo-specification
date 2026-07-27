@@ -60,7 +60,7 @@ jobs:
 
       - name: Run tests
         run: |
-          data-model/tools/check-examples.bash
+          tools/check-examples.bash
 
       - name: Check OpenAPI documents
         run: |
@@ -96,15 +96,15 @@ jobs:
 
       - name: Generate all artifacts
         run: |
-          data-model/tools/generate-all.bash
+          tools/generate-all.bash
 
       - name: Share generated artifacts with later jobs
         uses: actions/upload-artifact@v4
         with:
           name: generated-artifacts
           path: |
-            system-design/specification/applications/application-description.md
-            system-design/specification/margo-management-interface/desired-state.md
+            docs/specification/applications/application-description.md
+            docs/specification/margo-management-interface/desired-state.md
             system-design/specification/margo-management-interface/workload-management-api-1.0.0.yaml
 
   pages:
@@ -144,11 +144,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: generated-artifacts
-          path: system-design/specification
+          path: docs/specification
 
       - name: Generate merged documentation tree
         run: |
-          data-model/tools/generate-docs.bash
+          tools/generate-docs.bash
 
       - name: Build Pages
         run: poetry run -- mkdocs build
