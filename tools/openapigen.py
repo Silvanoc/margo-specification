@@ -131,19 +131,41 @@ class OpenApiGenerator(Generator):
         Transform JSON Schema constructs into OpenAPI v3.0.3 compatible forms:
 
         - ``const`` becomes ``enum`` with a single value (OpenAPI 3.0 doesn't support ``const``)
-        - ``type`` as a list (e.g. nullable ``["string", "null"]``) becomes ``anyOf``
+        - ``type: [X, "null"]`` becomes ``{type: X, nullable: true}`` (OpenAPI 3.0 has no ``"null"`` type)
+        - ``anyOf: [{$ref: X}, {type: "null"}]`` records ``X`` as a nullable schema and collapses to
+          a plain ``$ref`` (the ``nullable: true`` is applied on the referenced schema in a later pass,
+          because OpenAPI 3.0 ignores keywords placed as siblings of ``$ref``)
         - ``$ref`` paths are rewritten from ``#/$defs/`` to ``#/components/schemas/``
         """
         fixed_element = None
         if isinstance(element, dict):
+            # anyOf: [{$ref}, {type: null}]  →  nullable reference
+            any_of = element.get("anyOf")
+            if isinstance(any_of, list) and len(any_of) == 2:
+                refs = [m for m in any_of if isinstance(m, dict) and set(m) == {"$ref"}]
+                nulls = [m for m in any_of if m == {"type": "null"}]
+                if len(refs) == 1 and len(nulls) == 1:
+                    ref = refs[0]["$ref"]
+                    schema_name = ref.split("/")[-1]
+                    self._nullable_schemas.add(schema_name)
+                    fixed_element = {}
+                    for key, value in element.items():
+                        if key == "anyOf":
+                            fixed_element["$ref"] = ref
+                        else:
+                            fixed_element[key] = value
+                    return self._fix_openapi_spec(fixed_element)
             fixed_element = {}
             for key, value in element.items():
                 if key == "const":
                     fixed_element["enum"] = [value]
                 elif key == "type" and isinstance(value, list):
-                    fixed_element["anyOf"] = [
-                        {"type": item} for item in value if item != "null"
-                    ]
+                    non_null = [item for item in value if item != "null"]
+                    if "null" in value and len(non_null) == 1:
+                        fixed_element["type"] = non_null[0]
+                        fixed_element["nullable"] = True
+                    else:
+                        fixed_element["anyOf"] = [{"type": item} for item in non_null]
                 else:
                     if isinstance(value, dict | list):
                         value = self._fix_openapi_spec(value)
@@ -361,6 +383,7 @@ class OpenApiGenerator(Generator):
         ]  # data schemas provided by the template
         all_req_data_schemas = {}  # data schemas directly or transitively required by the API
         self._renaming = {}  # openapi <-> linkml renaming map
+        self._nullable_schemas: set[str] = set()  # schemas made nullable via a nullable $ref
         directly_required_linkml_elements: set[str] = (
             set()
         )  # LinkML class/type names of directly-referenced schemas
@@ -445,6 +468,12 @@ class OpenApiGenerator(Generator):
         for data_schema in sanitized_data_schemas.values():
             data_schema.pop("title", None)
         sanitized_data_schemas = self._fix_openapi_spec(sanitized_data_schemas)
+        # Apply schema-level `nullable: true` for schemas referenced by a nullable $ref.
+        # Done before renaming, since `_nullable_schemas` holds pre-rename names.
+        for schema_name in self._nullable_schemas:
+            target = sanitized_data_schemas.get(schema_name)
+            if isinstance(target, dict):
+                target["nullable"] = True
         sanitized_data_schemas = self._strip_additional_properties(sanitized_data_schemas)
         if self._renaming:
             sanitized_data_schemas = self._rename(sanitized_data_schemas)

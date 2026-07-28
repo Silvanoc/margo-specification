@@ -28,6 +28,10 @@ classes:
           Package optimization containing multiple ApplicationDeployment YAMLs.
         range: Bundle
         required: true
+        # The key must always be present, but its value MUST be null when there
+        # are zero deployments. UNCOMMITTED decouples "key required" from
+        # "value non-null", yielding a nullable sub-schema.
+        value_presence: UNCOMMITTED
       deployments:
         description: >-
           List of deployment objects describing each workload.
