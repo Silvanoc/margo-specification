@@ -157,6 +157,22 @@ The script [generate-docs.bash](./tools/generate-docs.bash) generates MarkDown d
 
 The LinkML specification documents can be found in the directory [model](./model/) and the resulting MarkDown documents are integrated with the other MarkDown documents in the directory [docs](./docs/).
 
+#### Generate OpenAPI YAML Documents
+
+The script [generate-openapi.bash](./tools/generate-openapi.bash) generates the OpenAPI v3.0.3 specification YAML file for the Workload Management API.
+
+It uses the custom generator [openapigen.py](./tools/openapigen.py) which composes a user-provided OpenAPI template (containing API header, paths/endpoints, and security schemes) with JSON Schema components generated from the LinkML data model. Only schemas referenced by the template's endpoints (and their transitive dependencies) are included.
+
+The generation:
+
+1. Reads the aggregate data model [`model/margo-data-model.linkml.yaml`](./model/margo-data-model.linkml.yaml) as the LinkML source.
+2. Reads the OpenAPI template [`tools/templates/openapi/workload-management-api-1.0.0.openapi.yaml`](./tools/templates/openapi/workload-management-api-1.0.0.openapi.yaml) which defines the API endpoints, request/response structures, and security schemes.
+3. Generates JSON Schema definitions for all referenced classes and injects them under `components/schemas` in the template.
+4. Writes the output to `build/artifacts/openapi/workload-management-api-1.0.0.openapi.yaml`.
+5. Copies the result into the tracked location `system-design/specification/margo-management-interface/workload-management-api-1.0.0.yaml` for version control. `generate-docs.bash` copies it from there into `build/site/` for MkDocs.
+
+When adding new API endpoints, edit the OpenAPI template to add the corresponding `paths` entries referencing the relevant `$ref: "#/components/schemas/<ClassName>"` schemas.
+
 #### Generate HTML Documents
 
 The documentation gets converted into HTML for public availability using `mkdocs`.
