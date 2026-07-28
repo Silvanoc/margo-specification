@@ -22,11 +22,15 @@ The final HTML documentation is built with [MkDocs](https://www.mkdocs.org/) usi
 │   ├── generation-gap.md                 # Differences between pre-draft and generated OpenAPI spec
 │   ├── examples/{valid,invalid}/         # Valid and invalid example files
 │   └── diagrams/                         # Static PNG diagrams
+├── system-design/                        # Tracked specification content (generated + manually-authored)
+│   └── specification/margo-management-interface/
+│       ├── specification-extensions.md   # Manually-authored extensions
+│       └── workload-management-api-1.0.0.yaml  # Generated OpenAPI spec
 ├── tools/                                # Generation & validation scripts
 │   ├── generate-all.bash                 # Runs all generators in sequence
-│   ├── generate-docs.bash                # Generates MarkDown from LinkML
+│   ├── generate-docs.bash                # Generates MarkDown from LinkML, copies system-design/ → build/site/
 │   ├── generate-json-schemas.bash        # Generates JSON-Schema artifacts
-│   ├── generate-openapi.bash             # Generates OpenAPI spec
+│   ├── generate-openapi.bash             # Generates OpenAPI spec (to build/artifacts/ + system-design/)
 │   ├── generate-class-diagram.bash       # Generates PlantUML class diagrams
 │   ├── check-examples.bash               # Validates schemas and examples
 │   ├── openapigen.py                     # Custom OpenAPI generator
@@ -41,17 +45,31 @@ The final HTML documentation is built with [MkDocs](https://www.mkdocs.org/) usi
 │       ├── main-classes/                 # Templates for per-resource docs
 │       └── openapi/
 │           └── workload-management-api-1.0.0.openapi.yaml   # OpenAPI template
-├── docs/                                 # Manually-authored + generated MarkDown (copied into build/site/ by generate-docs.bash)
-│   └── specification/                    # ← generated .md files land here
+├── docs/                                 # Manually-authored MarkDown (copied into build/site/ by generate-docs.bash)
+│   ├── index.md
+│   ├── CNAME
+│   ├── assets/
+│   ├── css/
+│   └── specification/
+│       ├── margo-management-interface/   # Manually-authored pages (api-requirements, certificate-api, etc.)
+│       ├── applications/                 # application-registry.md (manually-authored)
+│       ├── margo-devices/                # device-requirements.md
+│       └── observability/                # 3 pages (publishing/collecting/consuming)
 ├── build/                                # Generated artifacts (tracked in git)
 │   ├── artifacts/                        # diagrams, OpenAPI, JSON-Schema, intermediate markdown
+│   │   ├── diagrams/
+│   │   ├── json-schemas/
+│   │   ├── main-classes/                 # Generated per-resource .md (intermediate)
+│   │   ├── markdown/                     # Generated aggregate data-model .md (intermediate)
+│   │   └── openapi/                      # Generated OpenAPI spec
 │   └── site/                             # Merged MarkDown tree used by mkdocs build
+├── CONTRIBUTING.md                       # Contribution requirements and process
 ├── legacy/                               # Archived superseded trees
 │   ├── doc-generation/                   # Legacy scripts (superseded by tools/)
 │   ├── src-specification/                # Legacy per-resource schemas + templates + examples
 │   └── validate-openapi.py               # One-shot migration aid: compares generated spec vs pre-draft branch
 ├── mkdocs.yml                            # MkDocs configuration
-└── pyproject.toml                        # Python dependencies (linkml>=1.11.0, mkdocs, etc.)
+└── pyproject.toml                        # Python dependencies (linkml@git, mkdocs, mkdocs-material, openapi-spec-validator)
 ```
 
 ## Setup
@@ -69,7 +87,7 @@ poetry install
 ### Option C: pip
 
 ```bash
-pip install ./pyproject.toml
+pip install -e .
 ```
 
 ## Key Commands
@@ -105,7 +123,7 @@ This script:
 - Generates per-resource MarkDown using `tools/templates/main-classes/`
 - Generates the full data model MarkDown using `tools/templates/model/`
 - Copies generated diagrams and OpenAPI spec into the merged tree
-- Copies everything from `docs/` and `build/artifacts/` into `build/site/` (which is what `mkdocs build` reads)
+- Copies everything from `docs/` and `system-design/` into `build/site/` (which is what `mkdocs build` reads)
 
 ### Generate JSON-Schemas
 
@@ -168,6 +186,7 @@ model/*.linkml.yaml          (source of truth — LinkML schemas)
          │       ├──► generate-openapi.bash
          │       │       → build/artifacts/openapi/workload-management-api-1.0.0.openapi.yaml
          │       │       → moved into build/site/specification/margo-management-interface/
+         │       │       → also written to system-design/specification/margo-management-interface/ (tracked)
          │       │
          │       └──► JSON schemas copied into build/site/json-schemas/
          │
@@ -197,7 +216,7 @@ The `legacy/src-specification/` directory contains the original per-resource Lin
 
 The `legacy/doc-generation/` directory contains the original generation and validation scripts. These have been superseded by `tools/`. Do not use the old scripts.
 
-The `legacy/validate-openapi.py` script is a one-shot migration aid that compares the generated OpenAPI spec against the hand-written spec on the `pre-draft` branch. It becomes obsolete once `pre-draft` is fully replaced by the generated spec, at which point it should be deleted.
+The `legacy/validate-openapi.py` script is a one-shot migration aid that compares the generated OpenAPI spec against the hand-written spec on the `pre-draft` branch. See `legacy/README.md` for usage details. It becomes obsolete once `pre-draft` is fully replaced by the generated spec, at which point it should be deleted.
 
 ## How to Modify the LinkML Data Model
 
