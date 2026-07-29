@@ -19,6 +19,7 @@ dependencies = [
   'linkml-runtime @ git+https://github.com/linkml/linkml.git#subdirectory=packages/linkml_runtime',
   "openapi-spec-validator (>=0.9.0,<0.10.0)",
 ]
+# 'linkml>=1.11.1',
 
 [tool.poetry]
 requires-poetry = ">=2.0"
