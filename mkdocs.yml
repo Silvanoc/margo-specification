@@ -24,10 +24,12 @@ nav:
           - specification/applications/application-registry.md
       - Margo Devices:
           - specification/margo-devices/device-requirements.md
-      - Observability: 
-        - specification/observability/publishing-workload-observability-data.md
-        - specification/observability/collecting-workload-observability-data.md
-        - specification/observability/consuming-workload-observability-data.md
+      - Observability:
+          - specification/observability/publishing-workload-observability-data.md
+          - specification/observability/collecting-workload-observability-data.md
+          - specification/observability/consuming-workload-observability-data.md
+      - Problem Types: 
+          - specification/problem-types.md    
       - Specification Version Management:
           - specification/specification-version-management.md
 theme:
@@ -61,7 +63,7 @@ markdown_extensions:
       custom_fences:
         - name: mermaid
           class: mermaid
-          format: !!python/name:pymdownx.superfences.fence_code_format      
+          format: !!python/name:pymdownx.superfences.fence_code_format
 
 extra_css:
   - css/margo.css
@@ -70,7 +72,6 @@ extra_css:
 extra_javascript:
   - assets/swagger-ui-bundle.js
   - assets/swagger-ui-standalone-preset.js
-
 
 extra:
   # https://squidfunk.github.io/mkdocs-material/setup/setting-up-the-footer/#generator-notice
@@ -98,4 +99,3 @@ plugins:
         variable_start_string: =@=
         variable_end_string: =@=
   - privacy
-

@@ -10,8 +10,9 @@ Below is a breakdown of the two major categories these requirements fall under:
 2. Device client specific functions
     - Device Capability Reporting
     - Workload Status deployment reporting
-
+	
 Identity and authentication for the Management Interface are provided by the [Margo Identity and Authorization Framework](../identity/identity-framework.md) and the [WFM Identity Profile](../identity/wfm-identity-profile.md). A WFM Client and a WFM are each provisioned with an X.509-SVID before any Management Interface call is made.
+
 
 ## API Definition
 The REST API is defined via the OpenAPI Specification:
@@ -37,16 +38,61 @@ The WFM authorizes each request using local policy keyed on the authenticated WF
 
 ```json
 {
-  "type": "https://docs.margo.org/specification/problems/wfm-client-relationship-retired",
+  "type": "https://docs.margo.org/specification/problem-types#not-authorized",
   "title": "Client Relationship Retired",
   "status": 403,
-  "detail": "The WFM Client relationship has been retired by local policy."
+  "detail": "The WFM Client relationship has been retired by local policy."											 
 }
 ```
 
 Both parties represent themselves with an X.509-SVID, an X.509 certificate carrying a SPIFFE ID in its URI SAN. SVID structure, key and signature algorithms, and validation follow the MIAF [X.509-SVID profile](../identity/svids.md#x509-svid-profile) and [cryptographic requirements](../identity/svids.md#cryptographic-requirements).
 
 The Management Interface follows the MIAF [traffic-inspecting proxies](../identity/tls-requirements.md#traffic-inspecting-proxies) rules: a TLS-offloading proxy that forwards the validated client identity to the backend is supported, and an operator MUST exempt Margo mTLS endpoints from inline traffic inspection.
+
+ 
+
+## Error Responses
+All API error responses conform to [RFC 9457 Problem Details for HTTP APIs](https://datatracker.ietf.org/doc/html/rfc9457). Error responses are returned with `Content-Type: application/problem+json` and include a stable `type` URI that clients MUST use for programmatic error handling.
+
+The standard error response structure is:
+```json
+{
+  "type": "https://docs.margo.org/specification/problem-types#invalid-request",
+  "title": "Invalid Request",
+  "status": 400,
+  "detail": "Malformed request body.",
+  "instance": "/api/v1/capabilities/device-1"
+}
+```
+
+| Field | Required | RFC 9457 Description |
+| --- | --- | --- |
+| `type` | No | Optional. If omitted, it defaults implicitly to about:blank. A URI reference identifying the problem type. Clients SHOULD use type as the primary identifier for programmatic error handling. |
+| `title` | No | Optional. A short, human-readable summary of the problem type. For about:blank, the title is the same as the recommended HTTP status phrase for the status code. |
+| `status` | No | Optional. It conveys the HTTP status code in the response body for convenience and consistency and SHOULD match the actual HTTP status code of the response. |
+| `detail` | No | Optional. Human-readable explanation specific to this occurrence. |
+| `instance` | No | Optional. URI reference identifying the specific occurrence of the problem. |
+| `retryable` | No | Extension field. Whether the client MAY retry the request. |
+| `backoffStrategy` | No | Extension field. Recommended retry strategy: `none`, `fixed`, or `exponential`. |
+| `errors` | No | Extension field. Field-level validation errors. Common industry practice for validation failures (often 400 or 422). |
+
+The full catalogue of registered Margo problem type URIs are defined in [Problem Types](../problem-types.md).
+
+## Retry Semantics
+Transient failures MUST communicate retry information as follows:
+
+| Response | `Retry-After` Header | `retryable` | `backoffStrategy` |
+| --- | --- | --- | --- |
+| `429 Too Many Requests` | REQUIRED | `true` | `exponential` |
+| `503 Service Unavailable` | REQUIRED | `true` | `exponential` |
+| `500 Internal Server Error` | RECOMMENDED | `true` | `exponential` |
+| All other errors | NOT applicable | `false` | `none` |
+
+Clients MUST:
+- Respect the `Retry-After` header value and MUST NOT retry before it elapses
+- Use the `retryable` field to determine if retry is appropriate
+- Apply `backoffStrategy` when retrying
+
 
 ## Extended Device Downtime
 Interface patterns MUST support extended device communication downtime.

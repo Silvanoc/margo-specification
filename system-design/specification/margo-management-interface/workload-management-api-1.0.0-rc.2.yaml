@@ -1,4 +1,4 @@
-openapi: 3.1.0
+​openapi: 3.1.0
 info:
   title: Margo Workload Management API
   version: 1.0.0-rc.2
@@ -43,12 +43,28 @@ paths:
           description: Device capabilities created successfully
         '400':
           description: Malformed request body.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
         '403':
           description: The request is not authorized by the WFM's local policy (for example, the client relationship has been retired).
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
         '404':
           description: No gateway was found for the given child-device deviceId.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
         '422':
           description: Request body includes a semantic error.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
     delete:
       summary: Remove device (Unregister)
       parameters:
@@ -62,8 +78,16 @@ paths:
           description: Device capabilities removed successfully
         '403':
           description: The request is not authorized by the WFM's local policy (for example, the client relationship has been retired).
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
         '404':
           description: No device with the given deviceId was found for the client.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
   /api/v1/bundles/{digest}:
     get:
       summary: Retrieve a deployment bundle by its content digest
@@ -102,8 +126,16 @@ paths:
           description: Representation not modified
         '403':
           description: The request is not authorized by the WFM's local policy (for example, the client relationship has been retired).
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
         '404':
           description: Bundle not found for the given digest
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
 
   /api/v1/deployments:
     get:
@@ -148,9 +180,16 @@ paths:
           description: Not Modified - Manifest has not changed
         '403':
           description: The request is not authorized by the WFM's local policy (for example, the client relationship has been retired).
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'  
         '406':
           description: Not Acceptable - Server cannot generate a response matching the Accept header
-
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
 
   /api/v1/deployments/{deploymentId}/{digest}:
     get:
@@ -197,7 +236,7 @@ paths:
             ETag:
               schema:
                 type: string
-              description: > 
+              description: >
                 The ETag is returned to the client from the /deployments endpoint, it is the digest of the state manifest.
             Cache-Control:
               schema:
@@ -214,9 +253,17 @@ paths:
                 description: Raw YAML content of the ApplicationDeployment
         '403':
           description: The request is not authorized by the WFM's local policy (for example, the client relationship has been retired).
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
         '404':
           description: Deployment not found for the given digest
-
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        
   /api/v1/deployments/{deploymentId}/status:
     post:
       summary: Report deployment status
@@ -239,10 +286,22 @@ paths:
           description: The deployment status was created successfully.
         '400':
           description: Malformed request body.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
         '403':
           description: The request is not authorized by the WFM's local policy (for example, the client relationship has been retired).
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
         '422':
           description: Request body includes a semantic error.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
 
 components:
   securitySchemes:
@@ -254,7 +313,102 @@ components:
         present an X.509-SVID, validated against the Trust Domain's Trust
         Bundle per the Margo Identity and Authorization Framework (MIAF)
         and the WFM Identity Profile.
+
   schemas:
+    ProblemDetail:
+      type: object
+      description: >
+        RFC 9457 Problem Details for HTTP APIs. Returned with Content-Type:
+        application/problem+json.
+        See https://www.rfc-editor.org/rfc/rfc9457.
+        Extension members (RFC 9457 §3.2) are permitted via additionalProperties.
+        Vendors MAY add custom fields alongside standard margo fields.
+        Vendor-specific problem types MUST use their own URI namespace.
+        The https://docs.margo.org/specification/problem-types namespace is reserved for Margo.
+      required:
+        - type
+        - title
+        - status
+      properties:
+        type:
+          type: string
+          format: uri-reference
+          description: >
+            URI reference identifying the problem type.
+            Implementations MUST use the registered Margo type URI for any error
+            condition defined in the Margo specification.
+            For error conditions not defined in this specification, implementations
+            MAY define their own type URIs under their own namespace.
+            Clients MUST use this field for programmatic error handling, NOT the status code or title.
+            Clients encountering an unknown type URI SHOULD fall back to title, detail, and status
+            for display and handling.
+          example: https://docs.margo.org/specification/problem-types#invalid-request
+        title:
+          type: string
+          description: Short human-readable summary of the problem type.
+          example: Gateway not found
+        status:
+          type: integer
+          description: HTTP status code.
+          example: 404
+        detail:
+          type: string
+          description: Human-readable explanation specific to this occurrence of the problem.
+          example: No gateway was found for the given child-device deviceId.
+        instance:
+          type: string
+          format: uri-reference
+          description: URI reference identifying the specific occurrence of the problem.
+          example: /api/v1/capabilities/gateway-1/child-device-2
+        retryable:
+          type: boolean
+          description: >
+            Whether the client MAY retry the request. If true, client SHOULD respect
+            the Retry-After response header when present.
+          example: false
+        retryAfterSeconds:
+          type: integer
+          description: >
+            Advisory retry delay in seconds. The authoritative value is the Retry-After
+            response header when present. This field is advisory only.
+          example: 30
+        backoffStrategy:
+          type: string
+          enum: [none, fixed, exponential]
+          description: >
+            Recommended backoff strategy for retrying.
+            none: do not retry.
+            fixed: retry after retryAfterSeconds.
+            exponential: use exponential backoff starting at retryAfterSeconds.
+          example: exponential
+        errors:
+          type: array
+          description: >
+            Optional list of field-level validation errors.
+            SHOULD be present on 422 Unprocessable Entity responses.
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+                description: Field path that caused the validation error.
+                example: properties.roles
+              message:
+                type: string
+                description: Human-readable validation error message.
+                example: must contain at least one valid role
+      additionalProperties: true
+      # additionalProperties: true permits RFC 9457 §4 extension members.
+      # Margo extension fields: retryable, retryAfterSeconds, backoffStrategy, errors
+      #
+      # Vendor extension fields SHOULD follow RFC 9457 naming rules:
+      #   - Start with a letter (A-Z, a-z)
+      #   - Use only letters, digits, and underscores
+      #   - Be three characters or longer
+      #
+      # Vendor extension examples:
+      #   vendor_component: "sensor-subsystem"
+      #   vendor_error_code: "ERR_4291"
     ManifestVersion:
       type: number
       description: >
@@ -317,7 +471,7 @@ components:
         - deployments
       properties:
         manifestVersion:
-          $ref: '#/components/schemas/ManifestVersion' 
+          $ref: '#/components/schemas/ManifestVersion'
         bundle:
           $ref: '#/components/schemas/DeploymentBundleRef'
         deployments:
@@ -478,7 +632,7 @@ components:
       type: object
       description: Application Deployment manifest
       required: [metadata, spec]
-      properties:     
+      properties:
         id:
           type: string
           description: Unique identifier for the application deployment
@@ -566,7 +720,7 @@ components:
           description: Type of deployment profile
         components:
           type: array
-          items:
+          items: 
             $ref: '#/components/schemas/applicationDeploymentProfileComponent'
           description: Components of the deployment profile
     appParameterTarget:
