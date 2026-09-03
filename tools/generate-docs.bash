@@ -39,7 +39,7 @@ cp -R -H "${ROOT_DIR}/system-design/"* "${MERGED_DIR}/"
 
 # Main classes
 
-for schema_name in "application-description" "application-deployment" "deployment-status" "desired-state-manifest" "device-capabilities"; do
+for schema_name in "application-description" "application-deployment" "deployment-status" "desired-state-manifest" "device-capabilities" "problem-details"; do
   ${RUN} linkml generate doc \
     --directory="${TMP_DIR}" \
     --template-directory="${ROOT_DIR}/tools/templates/main-classes" \
@@ -55,6 +55,7 @@ done
 mv "${TGT_DIR}/deployment-status.md" "${MERGED_DIR}/specification/margo-management-interface/"
 mv "${TGT_DIR}/device-capabilities.md" "${MERGED_DIR}/specification/margo-management-interface/"
 mv "${TGT_DIR}/application-description.md" "${MERGED_DIR}/specification/applications/"
+mv "${TGT_DIR}/problem-details.md" "${MERGED_DIR}/specification/"
 
 # Whole Data Model
 

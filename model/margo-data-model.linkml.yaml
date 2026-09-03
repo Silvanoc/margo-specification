@@ -32,6 +32,7 @@ imports:
   - desired-state-manifest.linkml
   - device-capabilities.linkml
   - deployment-status.linkml
+  - problem-details.linkml
 
 default_prefix: margo
 

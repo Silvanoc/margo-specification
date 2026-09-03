@@ -39,6 +39,7 @@ nav:
           - DeploymentStatusManifest: data-model/DeploymentStatusManifest.md
       - Problem Types:
           - specification/problem-types.md
+          - specification/problem-details.md
       - Specification Version Management:
           - specification/specification-version-management.md
 theme:

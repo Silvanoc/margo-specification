@@ -49,8 +49,8 @@ def dim(text: str) -> str:
 
 
 ROOT = Path(__file__).resolve().parent.parent
-PRE_DRAFT_FILE = "system-design/specification/margo-management-interface/workload-management-api-1.0.0.yaml"
-GENERATED_FILE = "system-design/specification/margo-management-interface/workload-management-api-1.0.0.yaml"
+PRE_DRAFT_FILE = "system-design/specification/margo-management-interface/workload-management-api-1.0.0-rc.2.yaml"
+GENERATED_FILE = "system-design/specification/margo-management-interface/workload-management-api-1.0.0-rc.2.yaml"
 # GENERATED_FILE = "build/artifacts/openapi/workload-management-api-1.0.0.openapi.yaml"
 
 
