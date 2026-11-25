@@ -1,0 +1,364 @@
+# Shared application description definitions.
+id: https://specification.margo.org/application-description
+name: ApplicationDescription
+prefixes:
+  linkml: https://w3id.org/linkml/
+  margo: https://specification.margo.org/
+imports:
+  - linkml:types
+default_prefix: margo
+classes:
+  Metadata:
+    description: Metadata about the application.
+    rank: 10
+    attributes:
+      name:
+        description: >-
+          The application's official name.
+          This name is for display purposes only and can container whitespace and special characters.
+        rank: 20
+        range: string
+        required: true
+      description:
+        range: string
+        rank: 25
+      version:
+        description: The application's version.
+        rank: 30
+        range: string
+        required: true
+      catalog:
+        description: >-
+          Catalog element specifying the application's metadata for enabling its discovery.
+          See the [Catalog](#catalog-attributes) section below.
+        rank: 40
+        range: Catalog
+        required: true
+
+  Catalog:
+    description: Catalog metadata for displaying the application.
+    rank: 20
+    attributes:
+      application:
+        description: >-
+          Application element specifying the application specific metadata.
+          See the [Application Metadata](#applicationmetadata-attributes) section below.
+        rank: 10
+        range: ApplicationMetadata
+      author:
+        description: >-
+          Author element specifying metadata about the application's author.
+          See the [Author Metadata](#author-attributes) section below.
+        rank: 20
+        range: Author
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+      organization:
+        description: >-
+          Organization element specifying metadata about the organization/company providing the application.
+          See the [Organization Metadata](#organization-attributes) section below.
+        rank: 30
+        range: Organization
+        multivalued: true
+        required: true
+        inlined: true
+        inlined_as_list: true
+
+  ApplicationMetadata:
+    description: Metadata specific to the application.
+    rank: 30
+    attributes:
+      descriptionFile:
+        description: Link to the file containing the application's full description. The file should be a markdown file.
+        rank: 10
+        range: string
+      icon:
+        description: Link to the icon file (e.g., in PNG format).
+        rank: 20
+        range: string
+      licenseFile:
+        description: Link to the file that details the application's license. The file should either be a plain text, markdown or PDF file.
+        rank: 30
+        range: string
+      releaseNotes:
+        description: Statement about the changes for this application's release. The file should either be a markdown or PDF file.
+        rank: 40
+        range: string
+      site:
+        description: Link to the application's website.
+        rank: 50
+        range: string
+      tagline:
+        description: The application's slogan.
+        rank: 60
+        range: string
+      tags:
+        description: An array of strings that can be used to provide additional context for the application in a user interface to assist with task such as categorizing, searching, etc.
+        rank: 70
+        range: string
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+
+  Author:
+    description: Information about the application's author.
+    rank: 40
+    attributes:
+      name:
+        description: The name of the application's creator.
+        rank: 10
+        range: string
+      email:
+        description: Email address of the application's creator.
+        rank: 20
+        range: string
+        pattern: .*@[a-z0-9.-]*
+
+  Organization:
+    description: Information about the providing organization.
+    rank: 50
+    attributes:
+      name:
+        description: Organization responsible for the application's development and distribution.
+        rank: 10
+        range: string
+        required: true
+      site:
+        description: Link to the organization's website.
+        rank: 20
+        range: string
+
+  Configuration:
+    description: Configuration layout and validation rules.
+    rank: 110
+    attributes:
+      sections:
+        description: >-
+          Sections are used to group related parameters together,
+          so it is possible to present a user interface with a logical grouping of the parameters in each section.
+          See the [Section](#section-attributes) section below.
+        rank: 10
+        range: Section
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+        required: true
+      schema:
+        description: >-
+          Schema is used to provide details about how to validate each parameter value.
+          At a minimum, the parameter value must be validated to match the schema's data type.
+          The schema indicates additional rules the provided value must satisfy to be considered valid input.
+          See the [Schema](#schema-attributes) section below.
+        rank: 20
+        range: Schema
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+        required: true
+
+  Section:
+    description: Named sections within the configuration layout.
+    rank: 120
+    attributes:
+      name:
+        description: >-
+          The name of the section. This may be used in the user interface to show the grouping of the associated parameters within the section.
+        rank: 10
+        range: string
+        required: true
+      settings:
+        description: >-
+          Settings are used to provide instructions to the workload orchestration software vendor for displaying parameters to the user.
+          A user MUST be able to provide values for all settings.
+          See the [Setting](#setting-attributes) section below.
+        rank: 20
+        range: Setting
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+        required: true
+
+  Setting:
+    description: Individual configuration settings.
+    rank: 130
+    attributes:
+      parameter:
+        description: The name of the [parameter](#parameter-attributes) the setting is associated with.
+        rank: 10
+        range: string
+        required: true
+      name:
+        description: The parameter's display name to show in the user interface.
+        rank: 20
+        range: string
+        required: true
+      description:
+        description: The parameters's short description to provide additional context to the user in the user interface about what the parameter is for.
+        rank: 30
+        range: string
+      immutable:
+        description: If true, indicates the parameter value MUST not be changed once it has been set and used to install the application. Default is false if not provided.
+        rank: 40
+        range: boolean
+      schema:
+        description: The name of the schema definition to use to validate the parameter's value. See the [Schema](#schema-attributes) section below.
+        rank: 50
+        range: string
+        required: true
+
+  Schema:
+    description: Defines data type and rules for validating user provided parameter values. Subclasses (see below) define for each data type their own set of validation rules that can be used. The value MUST be validated against all rules defined in the schema.
+    rank: 140
+    attributes:
+      name:
+        description: The name of the schema rule. This used in the [setting](#setting-attributes) to link the setting to the schema rule.
+        rank: 10
+        range: string
+        required: true
+      dataType:
+        description: >-
+          Indicates the expected data type for the user provided value.
+          Accepted values are string, integer, double, boolean, array[string], array[integer], array[double], array[boolean].
+          At a minimum, the provided parameter value MUST match the schema's data type if no other validation rules are provided.
+        rank: 20
+        range: string
+        required: true
+      #validationRule:
+      #  description: >-
+      #    Defines the validation rules to use to validate the user provided parameter value.
+      #    The rules are based on the schema's data type and are listed below.
+      #    The value MUST be validated against any validation rules defined in the schema.
+      #  rank: 30
+      #  range: ValidationRule
+      #  required: false
+
+  TextValidationSchema:
+    is_a: Schema
+    description: Extends schema to define a string/text-specific set of validation rules that can be used.
+    rank: 150
+    attributes:
+      allowEmpty:
+        description: >-
+          If true, an empty value is permitted. Default is false if not provided.
+        rank: 30
+        range: boolean
+        required: false
+      minLength:
+        description: If set, indicates the minimum number of characters the value must have to be considered valid.
+        rank: 40
+        range: integer
+        required: false
+      maxLength:
+        description: If set, indicates the maximum number of characters the value must have to be considered valid.
+        rank: 50
+        range: integer
+        required: false
+      regexMatch:
+        description: If set, indicates a regular expression to use to validate the value.
+        rank: 55
+        range: string
+        required: false
+
+  BooleanValidationSchema:
+    is_a: Schema
+    description: Extends schema to define a boolean-specific set of validation rules that can be used.
+    rank: 160
+    attributes:
+      allowEmpty:
+        description: >-
+          If true, an empty value is permitted. Default is false if not provided.
+        rank: 30
+        range: boolean
+        required: false
+
+  NumericIntegerValidationSchema:
+    is_a: Schema
+    description: Extends schema to define a integer-specific set of validation rules that can be used.
+    rank: 170
+    attributes:
+      allowEmpty:
+        description: >-
+          If true, an empty value is permitted. Default is false if not provided.
+        rank: 30
+        range: boolean
+        required: false
+      minValue:
+        description: If set, indicates the minimum allowed integer value the value must have to be considered valid.
+        rank: 50
+        range: integer
+        required: false
+      maxValue:
+        description: If set, indicates the maximum allowed integer value the value must have to be considered valid.
+        rank: 50
+        range: integer
+        required: false
+
+  NumericDoubleValidationSchema:
+    is_a: Schema
+    description: Extends schema to define a double-specific set of validation rules that can be used.
+    rank: 180
+    attributes:
+      allowEmpty:
+        description: >-
+          If true, an empty value is permitted. Default is false if not provided.
+        rank: 30
+        range: boolean
+        required: false
+      minValue:
+        description: If set, indicates the minimum value to be considered valid.
+        rank: 50
+        range: float
+        required: false
+      maxValue:
+        description: If set, indicates the maximum value to be considered valid.
+        rank: 50
+        range: float
+        required: false
+      minPrecision:
+        description: If set, indicates the minimum level of precision the value must have to be considered valid.
+        rank: 50
+        range: integer
+        required: false
+      maxPrecision:
+        description: If set, indicates the maximum level of precision the value must have to be considered valid.
+        rank: 50
+        range: integer
+        required: false
+
+  SelectValidationSchema:
+    is_a: Schema
+    annotations:
+      margo_typed_options: '{"type_slot":"dataType","options_slot":"options","types":{"string":"string","integer":"integer","double":"number","boolean":"boolean"}}'
+    description: Extends schema to define a specific set of validation rules that can be used for select options.
+    rank: 190
+    attributes:
+      allowEmpty:
+        description: >-
+          If true, an empty value is permitted. Default is false if not provided.
+        rank: 30
+        range: boolean
+        required: false
+      multiselect:
+        description: If true, indicates multiple values can be selected. If multiple values can be selected the resulting value is an array of the selected values. The default is false if not provided.
+        rank: 80
+        range: boolean
+        required: false
+      options:
+        description: This provides the list of acceptable options the user can select from. The data type for each option must match the parameter setting’s data type.
+        rank: 80
+        any_of:
+          - range: string
+          - range: integer
+          - range: double
+          - range: boolean
+          - range: string
+            multivalued: true
+          - range: integer
+            multivalued: true
+          - range: double
+            multivalued: true
+          - range: boolean
+            multivalued: true
+        multivalued: true
+        required: true
