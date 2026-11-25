@@ -1,0 +1,204 @@
+# yaml-language-server: $schema=https://linkml.io/linkml-model/linkml_model/jsonschema/meta.schema.json
+id: https://specification.margo.org/workload-target-characteristics
+name: WorkloadTargetCharacteristics
+title: Workload Target Characteristics
+description: Shared characteristics applicable to workload target profiles.
+prefixes:
+  linkml: https://w3id.org/linkml/
+  margo: https://specification.margo.org/
+imports:
+  - linkml:types
+default_prefix: margo
+
+classes:
+  OtherCharacteristic:
+    description: Other characteristics may also be reported in a profile.
+    extra_slots:
+      allowed: true
+    attributes:
+      key:
+        range: string
+        required: true
+        pattern: '^(?!margo\.org/(?:resource/(?:cpu|memory|storage)|peripherals|interfaces)(?![\s\S]))'
+      properties:
+        range: OtherCharacteristicProperties
+        inlined: true
+        required: true
+  OtherCharacteristicProperties:
+    extra_slots:
+      allowed: true
+  CpuCharacteristic:
+    attributes:
+      key:
+        range: string
+        required: true
+        pattern: '^margo\.org/resource/cpu(?![\s\S])'
+        equals_string: margo.org/resource/cpu
+      properties:
+        range: CpuProperties
+        required: true
+        inlined: true
+  CpuProperties:
+    attributes:
+      cpus:
+        range: Cpu
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+  Cpu:
+    title: CPUs
+    rank: 20
+    annotations:
+      margo_profile_kind: characteristic
+      margo_profile_characteristic: CpuCharacteristic
+      margo_profile_example: profile/CpuCharacteristic-001.json
+    attributes:
+      cores:
+        description: Defines how many cores the CPU has available, in decimal units of CPU cores (e.g., 0.5 is half a core). Defined by the workload target owner.
+        range: float
+        required: true
+      architecture:
+        description: Define the CPU's architecture. Must be `amd64`, `arm64` or `arm`
+        range: CpuArchitecture
+        annotations:
+          margo_disallow_null: 'true'
+  MemoryCharacteristic:
+    attributes:
+      key:
+        range: string
+        required: true
+        pattern: '^margo\.org/resource/memory(?![\s\S])'
+        equals_string: margo.org/resource/memory
+      properties:
+        range: MemoryProperties
+        required: true
+        inlined: true
+  MemoryProperties:
+    title: Memory
+    rank: 30
+    annotations:
+      margo_profile_kind: characteristic
+      margo_profile_characteristic: MemoryCharacteristic
+      margo_profile_example: profile/MemoryCharacteristic-001.json
+    attributes:
+      available:
+        description: The amount of memory, in Gibibytes, available for workloads to utilize on the workload target.
+        range: float
+        required: true
+  StorageCharacteristic:
+    attributes:
+      key:
+        range: string
+        required: true
+        pattern: '^margo\.org/resource/storage(?![\s\S])'
+        equals_string: margo.org/resource/storage
+      properties:
+        range: StorageProperties
+        required: true
+        inlined: true
+  StorageProperties:
+    title: Storage
+    rank: 40
+    annotations:
+      margo_profile_kind: characteristic
+      margo_profile_characteristic: StorageCharacteristic
+      margo_profile_example: profile/StorageCharacteristic-001.json
+    attributes:
+      available:
+        description: The amount of storage, in Gibibytes, available for workloads to utilize on the workload target.
+        range: float
+        required: true
+  PeripheralsCharacteristic:
+    attributes:
+      key:
+        range: string
+        required: true
+        pattern: '^margo\.org/peripherals(?![\s\S])'
+        equals_string: margo.org/peripherals
+      properties:
+        range: PeripheralsProperties
+        required: true
+        inlined: true
+  PeripheralsProperties:
+    attributes:
+      peripherals:
+        range: Peripheral
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+  Peripheral:
+    title: Peripherals
+    description: Indicates the peripherals available on the workload target.
+    rank: 50
+    annotations:
+      margo_profile_kind: characteristic
+      margo_profile_characteristic: PeripheralsCharacteristic
+      margo_profile_example: profile/PeripheralsCharacteristic-001.json
+    attributes:
+      type:
+        description: The type of peripheral available on the workload target. Must be `gpu`, `display`, `camera`, `microphone`, or `speaker`.
+        range: PeripheralType
+        required: true
+      manufacturer:
+        description: The name of the manufacturer.
+        range: string
+        annotations:
+          margo_disallow_null: 'true'
+      model:
+        description: The model of the peripheral.
+        range: string
+        annotations:
+          margo_disallow_null: 'true'
+  InterfacesCharacteristic:
+    attributes:
+      key:
+        range: string
+        required: true
+        pattern: '^margo\.org/interfaces(?![\s\S])'
+        equals_string: margo.org/interfaces
+      properties:
+        range: InterfacesProperties
+        required: true
+        inlined: true
+  InterfacesProperties:
+    attributes:
+      interfaces:
+        range: Interface
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+  Interface:
+    title: Interfaces
+    description: Indicates the interfaces available on the workload target.
+    rank: 60
+    annotations:
+      margo_profile_kind: characteristic
+      margo_profile_characteristic: InterfacesCharacteristic
+      margo_profile_example: profile/InterfacesCharacteristic-001.json
+    attributes:
+      type:
+        description: The type of interfaces available on the workload target. Must be `ethernet`, `wifi`, `cellular`, `bluetooth`, `usb`, `canbus`, or `rs232`
+        range: InterfaceType
+        required: true
+enums:
+  CpuArchitecture:
+    permissible_values:
+      amd64:
+      arm64:
+      arm:
+  PeripheralType:
+    permissible_values:
+      gpu:
+      display:
+      camera:
+      microphone:
+      speaker:
+  InterfaceType:
+    permissible_values:
+      ethernet:
+      wifi:
+      cellular:
+      bluetooth:
+      usb:
+      canbus:
+      rs232:

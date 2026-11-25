@@ -9,9 +9,9 @@ poetry run python doc-generation/validate-application-json-schema.py
 ```
 
 The first command generates `build/json-schema/application-description.schema.json`
-from `src/specification/applications/application-description.linkml.yaml`, using
+from `model/application-description.linkml.yaml`, using
 `ApplicationDescription` as the root. The second reads that schema and the YAML
-and JSON files directly under `src/specification/applications/resources/examples/valid/`
+and JSON files directly under `tests/fixtures/generic-application/valid/`
 and `invalid/`. Both directories must contain fixtures. Valid examples must pass;
 invalid examples must produce JSON Schema validation errors. Parse errors, a missing
 or malformed schema, and missing fixtures are failures, not successful counterexamples.
@@ -20,11 +20,16 @@ means all expectations were met, 1 means an expectation failed, and 2 means an i
 or validation setup error occurred.
 
 The generated schema mirrors the current generic LinkML model; it is not a standalone
-Compose- or Helm-specific validator. Although descendants are included, a profile can
-match the base `DeploymentProfile` branch, bypassing subtype-specific constraints.
+Compose- or Helm-specific validator. Profiles can have repeated or unknown keys;
+deployment-type and corresponding component-type constraints require a separate validator.
 Descriptions and other normative, cross-reference, or semantic requirements may not
 be represented as JSON Schema constraints. Passing these checks is not proof of full
 specification conformance. The existing LinkML example checker is separate.
+
+The existing documentation generator still uses
+`src/specification/applications/application-description.linkml.yaml`, which has
+the older `type`/`deviceConstraints` representation and has not been migrated
+to this common `key`/`placementConstraints` model.
 
 Run the focused regression tests with:
 

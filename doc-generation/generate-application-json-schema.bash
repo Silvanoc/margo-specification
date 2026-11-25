@@ -8,6 +8,6 @@ TEMP_FILE="$(mktemp "${OUTPUT_DIR}/.application-description.XXXXXX")"
 trap 'rm -f "${TEMP_FILE}"' EXIT
 linkml generate json-schema --top-class ApplicationDescription \
     --include-range-class-descendants --preserve-names \
-    "${ROOT_DIR}/src/specification/applications/application-description.linkml.yaml" > "${TEMP_FILE}"
+    "${ROOT_DIR}/model/application-description.linkml.yaml" > "${TEMP_FILE}"
 mv "${TEMP_FILE}" "${OUTPUT_DIR}/application-description.schema.json"
 echo "Generated ${OUTPUT_DIR}/application-description.schema.json"

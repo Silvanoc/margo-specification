@@ -32,11 +32,30 @@ class ApplicationJsonSchemaTests(unittest.TestCase):
         self.assertIn("ApplicationDescription", schema["$defs"])
         result = run(sys.executable, str(CHECKER))
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        custom = ROOT / "src/specification/applications/resources/examples/valid/ApplicationDescription-003.json"
-        self.assertEqual(json.loads(custom.read_text())["deploymentProfiles"][0]["type"], "custom")
+        custom = ROOT / "tests/fixtures/generic-application/valid/mixed.yaml"
+        instance = yaml.safe_load(custom.read_text())
+        profiles = instance["deploymentProfiles"]
+        self.assertEqual([p["key"] for p in profiles], [
+            "margo.org/deployment/helm", "margo.org/deployment/compose",
+            "margo.org/deployment/helm", "example.org/deployment/future"])
         validator = jsonschema.validators.validator_for(schema)(schema)
-        examples = ROOT / "src/specification/applications/resources/examples/invalid"
-        for name in ("ApplicationDescription-002.json", "ApplicationDescription-003.yaml"):
+        self.assertEqual(list(validator.iter_errors(instance)), [])
+        self.assertNotIn("repository", profiles[-1]["components"][0]["properties"])
+        target = instance["parameters"]["greeting"]["targets"][0]
+        self.assertEqual(target["futureTargetField"], {"nested": [1, True]})
+        for field in ("pointer", "components"):
+            with self.subTest(missing_target_field=field):
+                value = target.pop(field)
+                self.assertTrue(list(validator.iter_errors(instance)))
+                target[field] = value
+        for key in ("", "  \t\n"):
+            with self.subTest(key=key):
+                profiles[-1]["key"] = key
+                self.assertTrue(list(validator.iter_errors(instance)))
+        profiles[-1]["key"] = "arbitrary/unknown-deployment"
+        self.assertEqual(list(validator.iter_errors(instance)), [])
+        examples = ROOT / "tests/fixtures/generic-application/invalid"
+        for name in ("missing-key.yaml", "missing-components.yaml", "missing-id.yaml"):
             with self.subTest(fixture=name):
                 instance = yaml.safe_load((examples / name).read_text())
                 errors = list(validator.iter_errors(instance))

@@ -11,7 +11,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_SCHEMA = ROOT / "build/json-schema/application-description.schema.json"
-DEFAULT_EXAMPLES = ROOT / "src/specification/applications/resources/examples"
+DEFAULT_EXAMPLES = ROOT / "tests/fixtures/generic-application"
 
 
 def main():
