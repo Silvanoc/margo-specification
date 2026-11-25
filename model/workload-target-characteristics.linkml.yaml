@@ -51,7 +51,6 @@ classes:
       key:
         range: string
         required: true
-        pattern: '^margo\.org/resource/cpu(?![\s\S])'
         equals_string: margo.org/resource/cpu
       properties:
         range: CpuProperties
@@ -86,7 +85,6 @@ classes:
       key:
         range: string
         required: true
-        pattern: '^margo\.org/resource/memory(?![\s\S])'
         equals_string: margo.org/resource/memory
       properties:
         range: MemoryProperties
@@ -109,7 +107,6 @@ classes:
       key:
         range: string
         required: true
-        pattern: '^margo\.org/resource/storage(?![\s\S])'
         equals_string: margo.org/resource/storage
       properties:
         range: StorageProperties
@@ -132,7 +129,6 @@ classes:
       key:
         range: string
         required: true
-        pattern: '^margo\.org/peripherals(?![\s\S])'
         equals_string: margo.org/peripherals
       properties:
         range: PeripheralsProperties
@@ -173,7 +169,6 @@ classes:
       key:
         range: string
         required: true
-        pattern: '^margo\.org/interfaces(?![\s\S])'
         equals_string: margo.org/interfaces
       properties:
         range: InterfacesProperties

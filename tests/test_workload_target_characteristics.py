@@ -96,6 +96,33 @@ class WorkloadTargetCharacteristicsTests(unittest.TestCase):
         self.assertTrue(view.get_class("OtherCharacteristicProperties").extra_slots.allowed)
         self.assertTrue(view.induced_slot("properties", "OtherCharacteristic").required)
 
+    def test_known_keys_use_exact_equality(self):
+        view = SchemaView(str(SCHEMA))
+        result = subprocess.run(
+            [str(Path(sys.executable).parent / "gen-json-schema"),
+             "--top-class", "WorkloadTargetProfile", str(SCHEMA)],
+            text=True, capture_output=True, check=True,
+        )
+        schema = json.loads(result.stdout)
+        for cls, key in (
+            ("CpuCharacteristic", "margo.org/resource/cpu"),
+            ("MemoryCharacteristic", "margo.org/resource/memory"),
+            ("StorageCharacteristic", "margo.org/resource/storage"),
+            ("PeripheralsCharacteristic", "margo.org/peripherals"),
+            ("InterfacesCharacteristic", "margo.org/interfaces"),
+        ):
+            with self.subTest(class_name=cls):
+                slot = view.induced_slot("key", cls)
+                self.assertEqual(slot.equals_string, key)
+                self.assertIsNone(slot.pattern)
+                key_schema = schema["$defs"][cls]["properties"]["key"]
+                self.assertEqual(key_schema["const"], key)
+                self.assertNotIn("pattern", key_schema)
+                validator = jsonschema.validators.validator_for(schema)(key_schema)
+                self.assertTrue(validator.is_valid(key))
+                for suffix in ("\n", "\r\n", "/other"):
+                    self.assertFalse(validator.is_valid(key + suffix))
+
     def test_imported_specialization_can_constrain_key(self):
         with tempfile.TemporaryDirectory() as directory:
             schema = Path(directory) / "profile.yaml"
