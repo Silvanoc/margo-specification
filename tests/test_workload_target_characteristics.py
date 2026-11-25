@@ -1,10 +1,14 @@
 """The workload target characteristic subschema stands alone and is reusable."""
 
+import json
 import re
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
 
+import jsonschema
 from linkml_runtime.utils.schemaview import SchemaView
 
 
@@ -20,7 +24,7 @@ class WorkloadTargetCharacteristicsTests(unittest.TestCase):
             "MemoryProperties", "StorageCharacteristic", "StorageProperties",
             "PeripheralsCharacteristic", "PeripheralsProperties", "Peripheral",
             "InterfacesCharacteristic", "InterfacesProperties", "Interface",
-            "OtherCharacteristic", "OtherCharacteristicProperties",
+            "OtherCharacteristic", "OtherCharacteristicProperties", "WorkloadTargetProfile",
         })
         self.assertFalse(any(c.tree_root for c in classes.values()))
         ranges = set(view.all_classes()) | set(view.all_types()) | set(view.all_enums())
@@ -37,6 +41,47 @@ class WorkloadTargetCharacteristicsTests(unittest.TestCase):
         ):
             self.assertEqual(view.induced_slot(slot, cls).range, enum)
             self.assertEqual(set(view.get_enum(enum).permissible_values), values)
+
+    def test_generic_profile_slots_and_annotations(self):
+        view = SchemaView(str(SCHEMA))
+        profile = view.get_class("WorkloadTargetProfile")
+        self.assertFalse(profile.tree_root)
+        self.assertEqual(profile.annotations["margo_extensions_pattern"].value,
+                         r'^x-[a-z][a-z0-9-]*-extensions(?![\s\S])')
+        slot = view.induced_slot("characteristics", "WorkloadTargetProfile")
+        self.assertTrue(slot.required and slot.multivalued and slot.inlined and slot.inlined_as_list)
+        self.assertEqual(slot.annotations["margo_unique_by"].value, "key")
+        self.assertNotIn("margo_required_characteristics", slot.annotations)
+        self.assertEqual([item.range for item in slot.any_of], [
+            "CpuCharacteristic", "MemoryCharacteristic", "StorageCharacteristic",
+            "PeripheralsCharacteristic", "InterfacesCharacteristic", "OtherCharacteristic",
+        ])
+
+    def test_generated_profile_json_schema(self):
+        generator = Path(sys.executable).parent / "gen-json-schema"
+        result = subprocess.run(
+            [str(generator), "--top-class", "WorkloadTargetProfile", str(SCHEMA)],
+            text=True, capture_output=True, check=True,
+        )
+        schema = json.loads(result.stdout)
+        validator = jsonschema.validators.validator_for(schema)(schema)
+        valid = [
+            {"characteristics": []},
+            {"characteristics": [{"key": "margo.org/deployment/future", "properties": {"nested": [1, {"custom": True}]}, "extra": 1}]},
+            {"characteristics": [{"key": "margo.org/resource/cpu", "properties": {"cpus": [{"cores": 2}]}}]},
+        ]
+        invalid = [
+            {}, {"characteristics": None}, {"characteristics": {}},
+            {"characteristics": [42]},
+            {"characteristics": [{"key": "margo.org/deployment/future"}]},
+            {"characteristics": [{"key": "margo.org/resource/cpu", "properties": {"cpus": [{"cores": "invalid"}]}}]},
+        ]
+        for instance in valid:
+            with self.subTest(valid=instance):
+                self.assertEqual(list(validator.iter_errors(instance)), [])
+        for instance in invalid:
+            with self.subTest(invalid=instance):
+                self.assertTrue(list(validator.iter_errors(instance)))
 
     def test_catch_all_is_open_to_deployment_types(self):
         view = SchemaView(str(SCHEMA))

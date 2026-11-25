@@ -11,6 +11,25 @@ imports:
 default_prefix: margo
 
 classes:
+  WorkloadTargetProfile:
+    description: Profile containing characteristics of a workload target.
+    annotations:
+      margo_extensions_pattern: '^x-[a-z][a-z0-9-]*-extensions(?![\s\S])'
+    attributes:
+      characteristics:
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+        required: true
+        annotations:
+          margo_unique_by: key
+        any_of:
+          - range: CpuCharacteristic
+          - range: MemoryCharacteristic
+          - range: StorageCharacteristic
+          - range: PeripheralsCharacteristic
+          - range: InterfacesCharacteristic
+          - range: OtherCharacteristic
   OtherCharacteristic:
     description: Other characteristics may also be reported in a profile.
     extra_slots:
