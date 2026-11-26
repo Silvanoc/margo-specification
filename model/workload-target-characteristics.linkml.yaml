@@ -69,7 +69,6 @@ classes:
     annotations:
       margo_profile_kind: characteristic
       margo_profile_characteristic: CpuCharacteristic
-      margo_profile_example: profile/CpuCharacteristic-001.json
     attributes:
       cores:
         description: Defines how many cores the CPU has available, in decimal units of CPU cores (e.g., 0.5 is half a core). Defined by the workload target owner.
@@ -96,7 +95,6 @@ classes:
     annotations:
       margo_profile_kind: characteristic
       margo_profile_characteristic: MemoryCharacteristic
-      margo_profile_example: profile/MemoryCharacteristic-001.json
     attributes:
       available:
         description: The amount of memory, in Gibibytes, available for workloads to utilize on the workload target.
@@ -118,7 +116,6 @@ classes:
     annotations:
       margo_profile_kind: characteristic
       margo_profile_characteristic: StorageCharacteristic
-      margo_profile_example: profile/StorageCharacteristic-001.json
     attributes:
       available:
         description: The amount of storage, in Gibibytes, available for workloads to utilize on the workload target.
@@ -148,7 +145,6 @@ classes:
     annotations:
       margo_profile_kind: characteristic
       margo_profile_characteristic: PeripheralsCharacteristic
-      margo_profile_example: profile/PeripheralsCharacteristic-001.json
     attributes:
       type:
         description: The type of peripheral available on the workload target. Must be `gpu`, `display`, `camera`, `microphone`, or `speaker`.
@@ -188,7 +184,6 @@ classes:
     annotations:
       margo_profile_kind: characteristic
       margo_profile_characteristic: InterfacesCharacteristic
-      margo_profile_example: profile/InterfacesCharacteristic-001.json
     attributes:
       type:
         description: The type of interfaces available on the workload target. Must be `ethernet`, `wifi`, `cellular`, `bluetooth`, `usb`, `canbus`, or `rs232`
