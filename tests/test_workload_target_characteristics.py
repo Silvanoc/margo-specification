@@ -28,7 +28,8 @@ class WorkloadTargetCharacteristicsTests(unittest.TestCase):
         })
         self.assertFalse(any(c.tree_root for c in classes.values()))
         for cls in classes.values():
-            self.assertNotIn("margo_profile_example", cls.annotations, cls.name)
+            for annotation in ("margo_profile_example", "margo_profile_kind", "margo_profile_characteristic"):
+                self.assertNotIn(annotation, cls.annotations, cls.name)
         ranges = set(view.all_classes()) | set(view.all_types()) | set(view.all_enums())
         for name in classes:
             for slot in view.class_induced_slots(name):

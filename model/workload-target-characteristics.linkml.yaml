@@ -66,9 +66,6 @@ classes:
   Cpu:
     title: CPUs
     rank: 20
-    annotations:
-      margo_profile_kind: characteristic
-      margo_profile_characteristic: CpuCharacteristic
     attributes:
       cores:
         description: Defines how many cores the CPU has available, in decimal units of CPU cores (e.g., 0.5 is half a core). Defined by the workload target owner.
@@ -92,9 +89,6 @@ classes:
   MemoryProperties:
     title: Memory
     rank: 30
-    annotations:
-      margo_profile_kind: characteristic
-      margo_profile_characteristic: MemoryCharacteristic
     attributes:
       available:
         description: The amount of memory, in Gibibytes, available for workloads to utilize on the workload target.
@@ -113,9 +107,6 @@ classes:
   StorageProperties:
     title: Storage
     rank: 40
-    annotations:
-      margo_profile_kind: characteristic
-      margo_profile_characteristic: StorageCharacteristic
     attributes:
       available:
         description: The amount of storage, in Gibibytes, available for workloads to utilize on the workload target.
@@ -142,9 +133,6 @@ classes:
     title: Peripherals
     description: Indicates the peripherals available on the workload target.
     rank: 50
-    annotations:
-      margo_profile_kind: characteristic
-      margo_profile_characteristic: PeripheralsCharacteristic
     attributes:
       type:
         description: The type of peripheral available on the workload target. Must be `gpu`, `display`, `camera`, `microphone`, or `speaker`.
@@ -181,9 +169,6 @@ classes:
     title: Interfaces
     description: Indicates the interfaces available on the workload target.
     rank: 60
-    annotations:
-      margo_profile_kind: characteristic
-      margo_profile_characteristic: InterfacesCharacteristic
     attributes:
       type:
         description: The type of interfaces available on the workload target. Must be `ethernet`, `wifi`, `cellular`, `bluetooth`, `usb`, `canbus`, or `rs232`
