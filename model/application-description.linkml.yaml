@@ -1,0 +1,714 @@
+# Shared application description definitions.
+id: https://specification.margo.org/application-description
+name: ApplicationDescription
+annotations:
+  margo_optional_typed_nonnull: "true"
+prefixes:
+  linkml: https://w3id.org/linkml/
+  margo: https://specification.margo.org/
+imports:
+  - linkml:types
+default_prefix: margo
+classes:
+  ApplicationDescription:
+    tree_root: true
+    annotations:
+      margo_extensions_pattern: '^x-[a-z][a-z0-9-]*-extensions(?![\s\S])'
+    description: Root class for an application description.
+    attributes:
+      apiVersion:
+        description: Identifier of the version of the API the object definition follows. Must be "v1".
+        rank: 10
+        range: string
+        required: true
+        equals_string: v1
+      id:
+        description: >-
+          An identifier for the application. The id is used to help create unique identifiers where required,
+          such as namespaces. The id must be lower case letters and numbers and MAY contain dashes.
+          Uppercase letters, underscores and periods MUST NOT be used. The id MUST NOT be more than 200 characters.
+        rank: 25
+        range: string
+        required: true
+        pattern: '^[a-z0-9-]{1,200}(?![\s\S])'
+      metadata:
+        description: Metadata element specifying characteristics about the application deployment. See the [Metadata Attributes](#metadata-attributes) section below.
+        rank: 30
+        range: Metadata
+        required: true
+      deploymentProfiles:
+        description: Deployment profiles specifying the deployment types the application supports. See the [Deployment](#deploymentprofile-attributes) section below. Each profile has one deployment type, and multiple profiles may have the same type.
+        rank: 40
+        range: DeploymentProfile
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+        required: true
+      parameters:
+        description: >-
+          Parameters specifying the configurable parameters to use when installing or updating the application.
+          Defined as a map where each key is the user-defined parameter name (e.g. `mysqlDatabase:`, `greeting:`,
+          `idpName:`, `myAppEndpoint:`), and each value is a Parameter object, i.e. map[string]Parameter.
+          See the [Parameter](#parameter-attributes) section below.
+        rank: 50
+        range: Parameter
+        multivalued: true
+        inlined: true
+        inlined_as_list: false
+      configuration:
+        description: >-
+          Configuration specifying how parameters should be displayed to the user for setting the value as well as
+          the rules to use to validate the user's input. See the [Configuration](#configuration-attributes) section below.
+        rank: 60
+        range: Configuration
+
+  DeploymentProfile:
+    description: A deployment profile of the deployment type identified by key.
+    rank: 60
+    annotations:
+      margo_extensions_pattern: '^x-[a-z][a-z0-9-]*-extensions(?![\s\S])'
+    extra_slots:
+      allowed: true
+    slots:
+      - key
+      - components
+    attributes:
+      id:
+        description: An identifier for the deployment profile, given by the application developer, used to uniquely identify this deployment profile from others within this application description's scope.
+        rank: 10
+        range: string
+        required: true
+      description:
+        description: >-
+          This human-readable description of a deployment profile allows for providing additional context about the deployment profile.
+          E.g., the application developer can use this to describe the deployment profile's purpose, such as the intended use case.
+          Additionally, the application developer can use this to provide further details about the resources, peripherals, and interfaces required to run the application.
+        rank: 20
+        range: string
+      placementConstraints:
+        description: Placement constraint match expressions required for the application to be placed on a workload target. See the [PlacementConstraints](#placementconstraints-attributes) section below.
+        rank: 30
+        range: PlacementConstraints
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+
+  Component:
+    description: A class representing a component of a deployment profile.
+    rank: 70
+    annotations:
+      margo_extensions_pattern: '^x-[a-z][a-z0-9-]*-extensions(?![\s\S])'
+    extra_slots:
+      allowed: true
+    attributes:
+      name:
+        description: A unique name used to identify the component package.
+        rank: 10
+        range: string
+        required: true
+      properties:
+        description: A dictionary specifying the component package's deployment details. See the [Component Properties](#componentproperties-attributes) section below.
+        rank: 20
+        range: ComponentProperties
+        required: true
+
+  ComponentProperties:
+    description: Properties specific to the component type corresponding to the profile's deployment type.
+    rank: 80
+    extra_slots:
+      allowed: true
+
+  Parameter:
+    description: >-
+      Defines a configurable parameter for the application. This object is used to build a property bag, i.e. `parameters`,
+      defined in the application description. See `parameters` under [ApplicationDescription Attributes](#top-level-attributes).
+    rank: 90
+    attributes:
+      name:
+        description: Name of the parameter.
+        rank: 10
+        identifier: true
+        required: true
+        range: string
+      value:
+        description: >-
+          The parameter's default value. Accepted data types are string, integer, double, boolean,
+          array[string], array[integer], array[double], array[boolean].
+        rank: 20
+        any_of:
+          - range: boolean
+          - range: integer
+          - range: double
+          - range: string
+          - range: boolean
+            multivalued: true
+          - range: integer
+            multivalued: true
+          - range: double
+            multivalued: true
+          - range: string
+            multivalued: true
+      targets:
+        description: Used to indicate which component the value should be applied to when installing or updating the application. See the [Target](#target-attributes) section below.
+        rank: 30
+        range: ParameterTarget
+        required: true
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+
+  ParameterTarget:
+    description: Specifies where the parameter applies in the deployment.
+    rank: 100
+    extra_slots:
+      allowed: true
+    attributes:
+      pointer:
+        description: Identifies where the parameter applies using the deployment type's addressing convention.
+        rank: 10
+        range: string
+        required: true
+      components:
+        description: >-
+          Indicates which deployment profile [components](#component-attributes) the parameter target applies to.
+          The component name specified here MUST match a component name in the [deployment profiles](#deploymentprofile-attributes) section.
+        rank: 20
+        range: string
+        multivalued: true
+        required: true
+
+  PlacementConstraints:
+    description: Placement constraint match expressions required for the application to be placed on a workload target.
+    rank: 61
+    attributes:
+      matchExpressions:
+        description: Match expressions evaluated against the workload target's reported characteristics.
+        rank: 10
+        range: MatchExpression
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+        required: true
+
+  MatchExpression:
+    description: An expression used to match a workload target characteristic or one of its properties.
+    rank: 62
+    annotations:
+      margo_selector_rules: '{"membership":["In","NotIn"],"existence":["Exists","DoesNotExist"],"numeric":["Gt","GtEq","Lt","LtEq"],"object_array":["ContainsAll","ContainsAny"]}'
+    rules:
+      - description: "`values` MUST be present when the operator is `In`."
+        preconditions: {slot_conditions: {operator: {equals_string: In}}}
+        postconditions: {slot_conditions: {values: {required: true}}}
+      - description: "`values` MUST be present when the operator is `NotIn`."
+        preconditions: {slot_conditions: {operator: {equals_string: NotIn}}}
+        postconditions: {slot_conditions: {values: {required: true}}}
+      - description: "`values` MUST be present when the operator is `Gt`."
+        preconditions: {slot_conditions: {operator: {equals_string: Gt}}}
+        postconditions: {slot_conditions: {values: {required: true}}}
+      - description: "`values` MUST be present when the operator is `Lt`."
+        preconditions: {slot_conditions: {operator: {equals_string: Lt}}}
+        postconditions: {slot_conditions: {values: {required: true}}}
+      - description: "`values` MUST be present when the operator is `GtEq`."
+        preconditions: {slot_conditions: {operator: {equals_string: GtEq}}}
+        postconditions: {slot_conditions: {values: {required: true}}}
+      - description: "`values` MUST be present when the operator is `LtEq`."
+        preconditions: {slot_conditions: {operator: {equals_string: LtEq}}}
+        postconditions: {slot_conditions: {values: {required: true}}}
+      - description: "`property` MUST be present when the operator is `In`."
+        preconditions: {slot_conditions: {operator: {equals_string: In}}}
+        postconditions: {slot_conditions: {property: {required: true}}}
+      - description: "`property` MUST be present when the operator is `NotIn`."
+        preconditions: {slot_conditions: {operator: {equals_string: NotIn}}}
+        postconditions: {slot_conditions: {property: {required: true}}}
+      - description: "`property` MUST be present when the operator is `Gt`."
+        preconditions: {slot_conditions: {operator: {equals_string: Gt}}}
+        postconditions: {slot_conditions: {property: {required: true}}}
+      - description: "`property` MUST be present when the operator is `GtEq`."
+        preconditions: {slot_conditions: {operator: {equals_string: GtEq}}}
+        postconditions: {slot_conditions: {property: {required: true}}}
+      - description: "`property` MUST be present when the operator is `Lt`."
+        preconditions: {slot_conditions: {operator: {equals_string: Lt}}}
+        postconditions: {slot_conditions: {property: {required: true}}}
+      - description: "`property` MUST be present when the operator is `LtEq`."
+        preconditions: {slot_conditions: {operator: {equals_string: LtEq}}}
+        postconditions: {slot_conditions: {property: {required: true}}}
+      - description: "`property` MUST be present when the operator is `ContainsAll`."
+        preconditions: {slot_conditions: {operator: {equals_string: ContainsAll}}}
+        postconditions: {slot_conditions: {property: {required: true}}}
+      - description: "`property` MUST be present when the operator is `ContainsAny`."
+        preconditions: {slot_conditions: {operator: {equals_string: ContainsAny}}}
+        postconditions: {slot_conditions: {property: {required: true}}}
+      - description: "`itemSelector` MUST be present when the operator is `ContainsAll`."
+        preconditions: {slot_conditions: {operator: {equals_string: ContainsAll}}}
+        postconditions: {slot_conditions: {itemSelector: {required: true}}}
+      - description: "`itemSelector` MUST be present when the operator is `ContainsAny`."
+        preconditions: {slot_conditions: {operator: {equals_string: ContainsAny}}}
+        postconditions: {slot_conditions: {itemSelector: {required: true}}}
+    attributes:
+      key:
+        description: The characteristic key to match.
+        rank: 10
+        range: string
+        required: true
+      property:
+        description: >-
+          An RFC 6901 JSON Pointer evaluated relative to the characteristic's properties object.
+          When omitted, the expression tests whether the characteristic identified by key exists.
+        rank: 20
+        range: string
+      operator:
+        description: Operator used to evaluate the referenced value. See [SelectorOperator](#selectoroperator) for all permissible values.
+        rank: 30
+        range: SelectorOperator
+        required: true
+      values:
+        description: Values used by the operator when required for matching expressions.
+        rank: 40
+        any_of:
+          - range: string
+          - range: integer
+          - range: double
+          - range: boolean
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+      itemSelector:
+        description: Selector evaluated against array elements. Required for the `ContainsAll` or `ContainsAny` operator.
+        rank: 50
+        range: ItemSelector
+
+  ItemSelector:
+    description: A set of item match expressions evaluated against array elements.
+    rank: 63
+    attributes:
+      matchExpressions:
+        description: Match expressions evaluated against an array element.
+        rank: 10
+        range: ItemMatchExpression
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+        required: true
+
+  ItemMatchExpression:
+    description: An expression used to match a property within an array element.
+    rank: 64
+    annotations:
+      margo_selector_rules: '{"membership":["In","NotIn"],"existence":["Exists","DoesNotExist"],"numeric":["Gt","GtEq","Lt","LtEq"]}'
+    attributes:
+      property:
+        description: An RFC 6901 JSON Pointer evaluated relative to the array element.
+        rank: 10
+        range: string
+        required: true
+      operator:
+        description: Operator used to evaluate the referenced value.
+        rank: 20
+        range: SelectorOperator
+        required: true
+      values:
+        description: Values used by the operator when required for matching expressions.
+        rank: 30
+        any_of:
+          - range: string
+          - range: integer
+          - range: double
+          - range: boolean
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+
+  Metadata:
+    description: Metadata about the application.
+    rank: 10
+    attributes:
+      name:
+        description: >-
+          The application's official name.
+          This name is for display purposes only and can container whitespace and special characters.
+        rank: 20
+        range: string
+        required: true
+      description:
+        range: string
+        rank: 25
+      version:
+        description: The application's version.
+        rank: 30
+        range: string
+        required: true
+      catalog:
+        description: >-
+          Catalog element specifying the application's metadata for enabling its discovery.
+          See the [Catalog](#catalog-attributes) section below.
+        rank: 40
+        range: Catalog
+        required: true
+
+  Catalog:
+    description: Catalog metadata for displaying the application.
+    rank: 20
+    attributes:
+      application:
+        description: >-
+          Application element specifying the application specific metadata.
+          See the [Application Metadata](#applicationmetadata-attributes) section below.
+        rank: 10
+        range: ApplicationMetadata
+      author:
+        description: >-
+          Author element specifying metadata about the application's author.
+          See the [Author Metadata](#author-attributes) section below.
+        rank: 20
+        range: Author
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+      organization:
+        description: >-
+          Organization element specifying metadata about the organization/company providing the application.
+          See the [Organization Metadata](#organization-attributes) section below.
+        rank: 30
+        range: Organization
+        multivalued: true
+        required: true
+        inlined: true
+        inlined_as_list: true
+
+  ApplicationMetadata:
+    description: Metadata specific to the application.
+    rank: 30
+    attributes:
+      descriptionFile:
+        description: Link to the file containing the application's full description. The file should be a markdown file.
+        rank: 10
+        range: string
+      icon:
+        description: Link to the icon file (e.g., in PNG format).
+        rank: 20
+        range: string
+      licenseFile:
+        description: Link to the file that details the application's license. The file should either be a plain text, markdown or PDF file.
+        rank: 30
+        range: string
+      releaseNotes:
+        description: Statement about the changes for this application's release. The file should either be a markdown or PDF file.
+        rank: 40
+        range: string
+      site:
+        description: Link to the application's website.
+        rank: 50
+        range: string
+      tagline:
+        description: The application's slogan.
+        rank: 60
+        range: string
+      tags:
+        description: An array of strings that can be used to provide additional context for the application in a user interface to assist with task such as categorizing, searching, etc.
+        rank: 70
+        range: string
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+
+  Author:
+    description: Information about the application's author.
+    rank: 40
+    attributes:
+      name:
+        description: The name of the application's creator.
+        rank: 10
+        range: string
+      email:
+        description: Email address of the application's creator.
+        rank: 20
+        range: string
+        pattern: .*@[a-z0-9.-]*
+
+  Organization:
+    description: Information about the providing organization.
+    rank: 50
+    attributes:
+      name:
+        description: Organization responsible for the application's development and distribution.
+        rank: 10
+        range: string
+        required: true
+      site:
+        description: Link to the organization's website.
+        rank: 20
+        range: string
+
+  Configuration:
+    description: Configuration layout and validation rules.
+    rank: 110
+    attributes:
+      sections:
+        description: >-
+          Sections are used to group related parameters together,
+          so it is possible to present a user interface with a logical grouping of the parameters in each section.
+          See the [Section](#section-attributes) section below.
+        rank: 10
+        range: Section
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+        required: true
+      schema:
+        description: >-
+          Schema is used to provide details about how to validate each parameter value.
+          At a minimum, the parameter value must be validated to match the schema's data type.
+          The schema indicates additional rules the provided value must satisfy to be considered valid input.
+          See the [Schema](#schema-attributes) section below.
+        rank: 20
+        range: Schema
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+        required: true
+
+  Section:
+    description: Named sections within the configuration layout.
+    rank: 120
+    attributes:
+      name:
+        description: >-
+          The name of the section. This may be used in the user interface to show the grouping of the associated parameters within the section.
+        rank: 10
+        range: string
+        required: true
+      settings:
+        description: >-
+          Settings are used to provide instructions to the workload orchestration software vendor for displaying parameters to the user.
+          A user MUST be able to provide values for all settings.
+          See the [Setting](#setting-attributes) section below.
+        rank: 20
+        range: Setting
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+        required: true
+
+  Setting:
+    description: Individual configuration settings.
+    rank: 130
+    attributes:
+      parameter:
+        description: The name of the [parameter](#parameter-attributes) the setting is associated with.
+        rank: 10
+        range: string
+        required: true
+      name:
+        description: The parameter's display name to show in the user interface.
+        rank: 20
+        range: string
+        required: true
+      description:
+        description: The parameters's short description to provide additional context to the user in the user interface about what the parameter is for.
+        rank: 30
+        range: string
+      immutable:
+        description: If true, indicates the parameter value MUST not be changed once it has been set and used to install the application. Default is false if not provided.
+        rank: 40
+        range: boolean
+      schema:
+        description: The name of the schema definition to use to validate the parameter's value. See the [Schema](#schema-attributes) section below.
+        rank: 50
+        range: string
+        required: true
+
+  Schema:
+    description: Defines data type and rules for validating user provided parameter values. Subclasses (see below) define for each data type their own set of validation rules that can be used. The value MUST be validated against all rules defined in the schema.
+    rank: 140
+    attributes:
+      name:
+        description: The name of the schema rule. This used in the [setting](#setting-attributes) to link the setting to the schema rule.
+        rank: 10
+        range: string
+        required: true
+      dataType:
+        description: >-
+          Indicates the expected data type for the user provided value.
+          Accepted values are string, integer, double, boolean, array[string], array[integer], array[double], array[boolean].
+          At a minimum, the provided parameter value MUST match the schema's data type if no other validation rules are provided.
+        rank: 20
+        range: string
+        required: true
+      #validationRule:
+      #  description: >-
+      #    Defines the validation rules to use to validate the user provided parameter value.
+      #    The rules are based on the schema's data type and are listed below.
+      #    The value MUST be validated against any validation rules defined in the schema.
+      #  rank: 30
+      #  range: ValidationRule
+      #  required: false
+
+  TextValidationSchema:
+    is_a: Schema
+    description: Extends schema to define a string/text-specific set of validation rules that can be used.
+    rank: 150
+    attributes:
+      allowEmpty:
+        description: >-
+          If true, an empty value is permitted. Default is false if not provided.
+        rank: 30
+        range: boolean
+        required: false
+      minLength:
+        description: If set, indicates the minimum number of characters the value must have to be considered valid.
+        rank: 40
+        range: integer
+        required: false
+      maxLength:
+        description: If set, indicates the maximum number of characters the value must have to be considered valid.
+        rank: 50
+        range: integer
+        required: false
+      regexMatch:
+        description: If set, indicates a regular expression to use to validate the value.
+        rank: 55
+        range: string
+        required: false
+
+  BooleanValidationSchema:
+    is_a: Schema
+    description: Extends schema to define a boolean-specific set of validation rules that can be used.
+    rank: 160
+    attributes:
+      allowEmpty:
+        description: >-
+          If true, an empty value is permitted. Default is false if not provided.
+        rank: 30
+        range: boolean
+        required: false
+
+  NumericIntegerValidationSchema:
+    is_a: Schema
+    description: Extends schema to define a integer-specific set of validation rules that can be used.
+    rank: 170
+    attributes:
+      allowEmpty:
+        description: >-
+          If true, an empty value is permitted. Default is false if not provided.
+        rank: 30
+        range: boolean
+        required: false
+      minValue:
+        description: If set, indicates the minimum allowed integer value the value must have to be considered valid.
+        rank: 50
+        range: integer
+        required: false
+      maxValue:
+        description: If set, indicates the maximum allowed integer value the value must have to be considered valid.
+        rank: 50
+        range: integer
+        required: false
+
+  NumericDoubleValidationSchema:
+    is_a: Schema
+    description: Extends schema to define a double-specific set of validation rules that can be used.
+    rank: 180
+    attributes:
+      allowEmpty:
+        description: >-
+          If true, an empty value is permitted. Default is false if not provided.
+        rank: 30
+        range: boolean
+        required: false
+      minValue:
+        description: If set, indicates the minimum value to be considered valid.
+        rank: 50
+        range: float
+        required: false
+      maxValue:
+        description: If set, indicates the maximum value to be considered valid.
+        rank: 50
+        range: float
+        required: false
+      minPrecision:
+        description: If set, indicates the minimum level of precision the value must have to be considered valid.
+        rank: 50
+        range: integer
+        required: false
+      maxPrecision:
+        description: If set, indicates the maximum level of precision the value must have to be considered valid.
+        rank: 50
+        range: integer
+        required: false
+
+  SelectValidationSchema:
+    is_a: Schema
+    annotations:
+      margo_typed_options: '{"type_slot":"dataType","options_slot":"options","types":{"string":"string","integer":"integer","double":"number","boolean":"boolean"}}'
+    description: Extends schema to define a specific set of validation rules that can be used for select options.
+    rank: 190
+    attributes:
+      allowEmpty:
+        description: >-
+          If true, an empty value is permitted. Default is false if not provided.
+        rank: 30
+        range: boolean
+        required: false
+      multiselect:
+        description: If true, indicates multiple values can be selected. If multiple values can be selected the resulting value is an array of the selected values. The default is false if not provided.
+        rank: 80
+        range: boolean
+        required: false
+      options:
+        description: This provides the list of acceptable options the user can select from. The data type for each option must match the parameter setting’s data type.
+        rank: 80
+        any_of:
+          - range: string
+          - range: integer
+          - range: double
+          - range: boolean
+          - range: string
+            multivalued: true
+          - range: integer
+            multivalued: true
+          - range: double
+            multivalued: true
+          - range: boolean
+            multivalued: true
+        multivalued: true
+        required: true
+
+slots:
+  key:
+    description: Identifies the deployment type of the profile.
+    rank: 10
+    range: string
+    required: true
+    pattern: '\S'
+  components:
+    description: Component element indicating the components to deploy when installing the application. See the [Component](#component-attributes) section below.
+    rank: 20
+    range: Component
+    multivalued: true
+    required: true
+    inlined: true
+    inlined_as_list: true
+
+enums:
+  SelectorOperator:
+    permissible_values:
+      In:
+        description: Matches when the referenced value equals one of the supplied values.
+      NotIn:
+        description: Matches when the referenced value does not equal any supplied value.
+      Exists:
+        description: Matches when the referenced key is present.
+      DoesNotExist:
+        description: Matches when the referenced key is absent.
+      Gt:
+        description: Matches when the referenced value is greater than the supplied value.
+      Lt:
+        description: Matches when the referenced value is less than the supplied value.
+      GtEq:
+        description: Matches when the referenced value is greater than or equal to the supplied value.
+      LtEq:
+        description: Matches when the referenced value is less than or equal to the supplied value.
+      ContainsAll:
+        description: Matches when an array contains an object satisfying all item selector expressions.
+      ContainsAny:
+        description: Matches when an array contains an object satisfying any item selector expression.

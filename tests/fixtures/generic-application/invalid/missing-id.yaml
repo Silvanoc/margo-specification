@@ -1,0 +1,10 @@
+apiVersion: v1
+id: invalid
+metadata:
+  name: Invalid
+  version: '1'
+  catalog:
+    organization: [{name: Example}]
+deploymentProfiles:
+  - key: example.org/deployment/future
+    components: []

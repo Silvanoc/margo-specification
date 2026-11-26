@@ -1,0 +1,56 @@
+id: https://specification.margo.org/oci-component-properties
+name: OCIComponentPropertiesSchema
+prefixes:
+  linkml: https://w3id.org/linkml/
+  margo: https://specification.margo.org/
+imports:
+  - application-description.linkml
+default_prefix: margo
+classes:
+  OCIComponentProperties:
+    is_a: ComponentProperties
+    extra_slots:
+      allowed: false
+    description: Typed component properties providing OCI coordinates and optional deployment behavior settings.
+    rank: 80
+    attributes:
+      repository:
+        annotations:
+          margo_oci_repository: "true"
+        description: >-
+          OCI repository URI for the component package
+          (e.g., oci://registry.example.com/org/component-name).
+          MUST be a valid OCI reference using the oci:// scheme.
+        rank: 10
+        range: string
+        required: true
+        pattern: "^oci://.+"
+      revision:
+        description: >-
+          OCI tag identifying the component version within the repository
+          (e.g., "1.0.0", "2.3.1", "1.0.0-rc1", "1.0.0_build.123").
+          MUST be a valid SemVer 2.0 string without a leading `v`.
+          SemVer build metadata separator `+` MUST be stored as `_`
+          because `+` is not a valid OCI tag character.
+          Implementations comparing this value against a SemVer string
+          MUST convert `_` back to `+` before comparison.
+        rank: 20
+        range: string
+        required: true
+        pattern: '^(?=.{1,128}(?![\s\S]))(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-(0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)(\.(0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*))*)?(_[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?(?![\s\S])'
+      wait:
+        annotations:
+          margo_disallow_null: "true"
+        description: Whether to wait for the component deployment to complete.
+        rank: 30
+        range: boolean
+      timeout:
+        annotations:
+          margo_disallow_null: "true"
+        description: >-
+          Maximum time to wait for component installation to complete.
+          Format is "##m##s" (e.g., "5m0s", "8m30s").
+          If installation does not complete before timeout, deployment fails.
+        rank: 40
+        range: string
+        pattern: '^\d+m\d+s(?![\s\S])'

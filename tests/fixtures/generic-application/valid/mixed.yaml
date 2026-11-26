@@ -1,0 +1,37 @@
+apiVersion: v1
+id: mixed
+metadata:
+  name: Mixed application
+  version: '1'
+  catalog:
+    organization:
+      - name: Example
+deploymentProfiles:
+  - id: helm-one
+    key: margo.org/deployment/helm
+    components:
+      - name: chart
+        properties: {repository: 'oci://example/chart', revision: '1.0.0'}
+  - id: compose-one
+    key: margo.org/deployment/compose
+    components:
+      - name: compose
+        properties: {repository: 'oci://example/compose', revision: '1.0.0'}
+  - id: helm-two
+    key: margo.org/deployment/helm
+    components: []
+  - id: unknown
+    key: example.org/deployment/future
+    futureProfileField: {nested: [1, true]}
+    components:
+      - name: future
+        futureComponentField: [one, two]
+        properties:
+          arbitrary: {nested: [1, null, {enabled: true}]}
+parameters:
+  greeting:
+    value: [hello, world]
+    targets:
+      - pointer: /greeting
+        components: [future]
+        futureTargetField: {nested: [1, true]}
